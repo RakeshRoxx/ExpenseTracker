@@ -1,0 +1,1 @@
+fun helloShared(): String = "Hello from KMP"

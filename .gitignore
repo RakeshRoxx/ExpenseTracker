@@ -1,0 +1,76 @@
+# ===== Android Studio / IntelliJ =====
+*.iml
+.idea/
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+
+# ===== Gradle / Build =====
+.gradle/
+build/
+**/build/
+.externalNativeBuild/
+.cxx/
+captures/
+
+# ===== Local config / Secrets =====
+local.properties
+/local.properties
+keystore.properties
+*.jks
+*.keystore
+.env
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== Logs =====
+*.log
+
+# ===== Native / NDK artifacts =====
+*.so
+*.a
+*.o
+*.obj
+
+# (If you commit prebuilt libs in jniLibs, keep this commented)
+# app/src/main/jniLibs/**
+
+# ===== ML / LLM / Models =====
+*.gguf
+*.bin
+*.onnx
+*.tflite
+*.pt
+models/
+model_cache/
+llm_cache/
+
+# ===== Dataset exports (SMS dumps, training data) =====
+sms_dataset_*.jsonl
+sms_dataset_*.csv
+datasets/
+exports/
+training_data/
+
+# ===== Python (if you add training scripts later) =====
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ===== Node (if any tooling) =====
+node_modules/
+
+# ===== Coverage / Reports =====
+coverage/
+reports/
+*.exec
+
+# ===== Temp =====
+*.tmp
+*.temp
