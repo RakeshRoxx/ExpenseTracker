@@ -1,13 +1,18 @@
 package com.amaterasu.expense_tracker.ui.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.amaterasu.expense_tracker.data.entity.TransactionEntity
 import com.amaterasu.expense_tracker.viewmodel.TransactionViewModel
 
 @Composable
@@ -15,12 +20,29 @@ fun TransactionListScreen(
     viewModel: TransactionViewModel = viewModel()
 ) {
     val transactions by viewModel.transactions.collectAsState()
+    var selectedTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        items(transactions) { tx ->
-            TransactionRow(tx)
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(transactions, key = { it.id }) { tx ->
+                TransactionRow(
+                    tx = tx,
+                    onClick = { selectedTransaction = tx }
+                )
+            }
+        }
+
+        selectedTransaction?.let { tx ->
+            EditTransactionDialog(
+                transaction = tx,
+                onDismiss = { selectedTransaction = null },
+                onSave = { updatedTransaction ->
+                    viewModel.updateTransaction(updatedTransaction)
+                    selectedTransaction = null
+                }
+            )
         }
     }
 }

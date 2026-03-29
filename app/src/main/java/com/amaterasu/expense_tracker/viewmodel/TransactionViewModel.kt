@@ -102,6 +102,17 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun updateTransaction(transaction: TransactionEntity) {
+        viewModelScope.launch {
+            try {
+                repo.updateTransaction(transaction)
+                refreshMonthlyTotal()
+            } catch (e: Exception) {
+                Log.e("TransactionViewModel", "Update failed", e)
+            }
+        }
+    }
+
     private fun stableIdFromJson(
         amount: Double,
         merchant: String,

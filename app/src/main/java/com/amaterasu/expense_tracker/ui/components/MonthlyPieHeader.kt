@@ -12,16 +12,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.amaterasu.expense_tracker.data.entity.TransactionEntity
 
 @Composable
 fun MonthlyPieHeader(
-    transactions: List<TransactionEntity>
+    total: Double
 ) {
-    val total = transactions
-        .filter { it.type == "DEBIT" }
-        .sumOf { it.amount }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()

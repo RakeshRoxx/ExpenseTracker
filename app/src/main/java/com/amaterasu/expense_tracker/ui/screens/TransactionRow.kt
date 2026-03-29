@@ -1,10 +1,14 @@
 package com.amaterasu.expense_tracker.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -17,39 +21,56 @@ import com.amaterasu.expense_tracker.data.entity.TransactionEntity
 import utils.Utils
 
 @Composable
-fun TransactionRow(tx: TransactionEntity) {
+fun TransactionRow(
+    tx: TransactionEntity,
+    onClick: () -> Unit
+) {
+    val amountColor = if (tx.type == "DEBIT") Color(0xFFC62828) else Color(0xFF2E7D32)
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 6.dp),
-        elevation = CardDefaults.cardElevation(2.dp)
+        shape = RoundedCornerShape(18.dp),
+        elevation = CardDefaults.cardElevation(3.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp)
         ) {
-            Column {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
                     text = tx.merchant,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = tx.sourceBank,
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = Utils.formatTimeStamp(tx.smsReceivedTimestamp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            Text(
-                text = "₹${tx.amount}",
-                style = MaterialTheme.typography.titleMedium,
-                color = if (tx.type == "DEBIT") Color.Red else Color.Green
-            )
+            Spacer(modifier = Modifier.width(16.dp))
 
             Text(
-                text = Utils.formatTimeStamp(tx.smsReceivedTimestamp),
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.Blue
+                text = "₹${tx.amount}",
+                style = MaterialTheme.typography.titleLarge,
+                color = amountColor
             )
         }
     }

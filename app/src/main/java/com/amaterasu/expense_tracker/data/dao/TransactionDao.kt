@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.amaterasu.expense_tracker.data.entity.TransactionEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -23,4 +24,7 @@ interface TransactionDao {
         WHERE type = 'DEBIT'
         AND smsReceivedTimestamp BETWEEN :start and :end""")
     suspend fun totalSpendByDate(start: Long, end: Long) : Double
+
+    @Update
+    suspend fun updateTransaction(transaction: TransactionEntity)
 }

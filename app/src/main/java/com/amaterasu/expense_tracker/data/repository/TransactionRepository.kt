@@ -11,6 +11,10 @@ class TransactionRepository (private val dao: TransactionDao) {
         dao.insertAll(transaction.map { it.toEntity() })
     }
 
+    suspend fun updateTransaction(transaction: TransactionEntity) {
+        dao.updateTransaction(transaction)
+    }
+
     suspend fun totalAmountByDate(start: Long, end: Long) : Double {
         return dao.totalSpendByDate(start, end);
     }
