@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,12 +15,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.amaterasu.expense_tracker.notification.NotificationHelper
 import com.amaterasu.expense_tracker.sms.SmsPermission
 import com.amaterasu.expense_tracker.ui.screens.DashboardScreen
 import com.amaterasu.expense_tracker.ui.theme.ExpensetrackerTheme
-import com.amaterasu.expense_tracker.viewmodel.MainViewModel
 import com.amaterasu.expense_tracker.worker.WorkScheduler
 
 class MainActivity : ComponentActivity() {
@@ -27,12 +26,27 @@ class MainActivity : ComponentActivity() {
     private val smsPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             if (granted) {
-                WorkScheduler.schedule(this)
+                maybeRequestNotificationPermission()
+            } else {
+                Log.w("PERMISSION", "READ_SMS denied")
             }
         }
 
     private val notificationPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            maybeRequestFgsPermission()
+        }
+
+    private val fgsPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                WorkScheduler.schedule(this)
+            } else {
+                Log.w("PERMISSION", "FOREGROUND_SERVICE_DATA_SYNC denied")
+                // You can still run background work without FGS, just no foreground service
+                WorkScheduler.schedule(this)
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,38 +57,55 @@ class MainActivity : ComponentActivity() {
         setContent {
             ExpensetrackerTheme {
 
-                val mainViewModel: MainViewModel = viewModel()
-
                 LaunchedEffect(Unit) {
-                    // Request SMS permission if needed
-                    if (!SmsPermission.hasPermission(this@MainActivity)) {
-                        smsPermissionLauncher.launch(Manifest.permission.READ_SMS)
-                    } else {
-                        WorkScheduler.schedule(this@MainActivity)
-                    }
-
-                    // Request notification permission on Android 13+
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        if (ContextCompat.checkSelfPermission(
-                                this@MainActivity,
-                                Manifest.permission.POST_NOTIFICATIONS
-                            ) != PackageManager.PERMISSION_GRANTED
-                        ) {
-                            notificationPermissionLauncher.launch(
-                                Manifest.permission.POST_NOTIFICATIONS
-                            )
-                        }
-                    }
+                    requestPermissionsInOrder()
                 }
 
-                Scaffold(
-                    modifier = Modifier.fillMaxSize()
-                ) { padding ->
-                    DashboardScreen(
-                        modifier = Modifier.padding(padding)
-                    )
+                Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
+                    DashboardScreen(modifier = Modifier.padding(padding))
                 }
             }
         }
+    }
+
+    private fun requestPermissionsInOrder() {
+        // 1️⃣ SMS permission
+        if (!SmsPermission.hasPermission(this)) {
+            smsPermissionLauncher.launch(Manifest.permission.READ_SMS)
+            return
+        }
+
+        // 2️⃣ Notification permission (Android 13+)
+        maybeRequestNotificationPermission()
+    }
+
+    private fun maybeRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                return
+            }
+        }
+        maybeRequestFgsPermission()
+    }
+
+    private fun maybeRequestFgsPermission() {
+        if (Build.VERSION.SDK_INT >= 34) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                fgsPermissionLauncher.launch(Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC)
+                return
+            }
+        }
+
+        // ✅ All required permissions handled → schedule work
+        WorkScheduler.schedule(this)
     }
 }

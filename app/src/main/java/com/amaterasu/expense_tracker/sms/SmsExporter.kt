@@ -2,6 +2,7 @@ package com.amaterasu.expense_tracker.sms
 
 import android.content.Context
 import android.provider.Telephony
+import android.util.Log
 import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
@@ -10,6 +11,7 @@ import java.util.*
 object SmsExporter {
 
     fun exportAllSmsToJsonl(context: Context): File {
+        Log.d("exportAllSmsToJsonl", "Exporter function called")
         val outputFile = File(
             context.getExternalFilesDir(null),
             "sms_dataset_${System.currentTimeMillis()}.jsonl"
@@ -47,8 +49,10 @@ object SmsExporter {
                         put("type", type)
                     }
 
-                    writer.write(json.toString())
-                    writer.newLine()
+                    if(looksLikeTransaction(body, sender)) {
+                        writer.write(json.toString())
+                        writer.newLine()
+                    }
                 }
             }
         }
@@ -63,5 +67,17 @@ object SmsExporter {
             .replace(Regex("A/c\\s*\\d+"), "A/c XXXXX")             // account numbers
             .replace(Regex("[a-zA-Z0-9._-]+@[a-zA-Z]+"), "user@upi")// UPI IDs
             .replace(Regex("\\b\\d{4,}\\b"), "XXXX")                // long numbers
+    }
+
+    private fun looksLikeTransaction(text: String, sender: String): Boolean {
+        Log.d("looksLikeTransaction", "Sender Name: $sender");
+        Log.d("looksLikeTransaction", "Sms Body: $text");
+
+        if (sender.contains("-S") || sender.contains("-T")) {
+            return true;
+        }
+
+        return listOf("debit", "debited", "credit", "credited", "spent", "₹", "rs.", "INR")
+            .any { text.contains(it, ignoreCase = true) };
     }
 }

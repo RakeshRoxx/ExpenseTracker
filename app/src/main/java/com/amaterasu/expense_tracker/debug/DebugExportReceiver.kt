@@ -10,11 +10,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class DebugExportReceiver : BroadcastReceiver() {
+
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == "com.amaterasu.expense_tracker.EXPORT_SMS") {
-            CoroutineScope(Dispatchers.IO).launch {
+        Log.d("DebugExportReceiver", "🔥 onReceive called. action=${intent.action}")
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                Log.d("DebugExportReceiver", "⏳ Starting SMS export...")
                 val file = SmsExporter.exportAllSmsToJsonl(context)
-                Log.d("DebugExportReceiver", "Exported: ${file.absolutePath}")
+                Log.d("DebugExportReceiver", "✅ Exported SMS to: ${file.absolutePath}")
+            } catch (t: Throwable) {
+                Log.e("DebugExportReceiver", "❌ Export failed", t)
             }
         }
     }

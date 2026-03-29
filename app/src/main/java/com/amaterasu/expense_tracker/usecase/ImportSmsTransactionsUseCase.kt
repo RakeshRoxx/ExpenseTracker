@@ -5,6 +5,8 @@ import domain.Transaction
 import com.amaterasu.expense_tracker.sms.RawSms
 import com.amaterasu.expense_tracker.sms.SmsProcessor
 import com.amaterasu.expense_tracker.sms.SmsReader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class ImportSmsTransactionsUseCase(
     context: Context,
@@ -13,7 +15,7 @@ class ImportSmsTransactionsUseCase(
     private val reader = SmsReader(context)
     private val processor = SmsProcessor()
 
-    suspend fun execute(): List<Transaction> {
+    suspend fun execute(): List<Transaction> = withContext(Dispatchers.IO) {
         val rawSms = reader.readInbox()
         val results = mutableListOf<Transaction>()
 
@@ -27,6 +29,6 @@ class ImportSmsTransactionsUseCase(
             if (txn != null) results.add(txn)
         }
 
-        return results
+        results
     }
 }

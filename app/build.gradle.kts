@@ -42,6 +42,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -60,6 +61,8 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.transport.runtime)
+    implementation(libs.androidx.monitor)
+    implementation(libs.androidx.junit.ktx)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
@@ -79,16 +82,15 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
 
     // ---------- Tests ----------
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+//    testImplementation("junit:junit:4.13.2")
+//    testImplementation(libs.junit4)
+//    androidTestImplementation(libs.androidx.junit)
+//    androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-
-    // --------------- ML/LLM ---------------
-//    implementation("com.google.mlkit:entity-extraction:16.0.0-beta5")
-//    implementation("com.google.mediapipe:tasks-genai:0.10.27")
-
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    testImplementation ("junit:junit:4.13.2")
 }
 
 ksp {

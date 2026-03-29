@@ -10,16 +10,18 @@ import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
 
 object WorkScheduler {
-    private const val WORK_NAME = "sms_import_worker";
+    private const val WORK_NAME = "sms_import_worker"
 
     fun schedule(context: Context) {
-        val constraints  = Constraints.Builder()
+        val constraints = Constraints.Builder()
             .setRequiresBatteryNotLow(true)
-            .build();
+            .build()
 
-        val request = PeriodicWorkRequestBuilder<SmsImportWorker>(30, TimeUnit.SECONDS)
+        val request = PeriodicWorkRequestBuilder<SmsImportWorker>(
+            15, TimeUnit.MINUTES  // ✅ minimum allowed
+        )
             .setConstraints(constraints)
-            .build();
+            .build()
 
         WorkManager.getInstance(context)
             .enqueueUniquePeriodicWork(
@@ -29,14 +31,14 @@ object WorkScheduler {
             )
     }
 
-    // 🔧 Debug only (manual trigger)
-    fun runOnce(context: Context) {
-        Log.d("WORKER_RUN_ONCE", "WORKER_RUN_ONCE");
+    // ✅ User-triggered run → allow Foreground Service
+    fun runOnceFromUser(context: Context) {
+        Log.d("WORKER_RUN_ONCE", "User triggered run")
 
-        WorkManager.getInstance(context)
-            .enqueue(
-                OneTimeWorkRequestBuilder<SmsImportWorker>().build()
-            )
+        val request = OneTimeWorkRequestBuilder<SmsImportWorker>()
+            .addTag("USER_TRIGGERED")   // 👈 key
+            .build()
+
+        WorkManager.getInstance(context).enqueue(request)
     }
-
 }

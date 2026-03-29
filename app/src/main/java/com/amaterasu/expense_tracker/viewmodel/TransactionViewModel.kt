@@ -10,11 +10,9 @@ import androidx.lifecycle.viewModelScope
 import com.amaterasu.expense_tracker.data.database.RoomDatabaseProvider
 import com.amaterasu.expense_tracker.data.entity.TransactionEntity
 import com.amaterasu.expense_tracker.data.repository.TransactionRepository
+import com.amaterasu.expense_tracker.ml.TfidfClassifierProvider
 import com.amaterasu.expense_tracker.sms.SmsExporter
 import com.amaterasu.expense_tracker.usecase.ImportSmsTransactionsUseCase
-import domain.Category
-import domain.TransactionSource
-import domain.TransactionType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,7 +23,6 @@ import kotlinx.coroutines.withContext
 import java.security.MessageDigest
 import java.time.LocalDate
 import java.time.ZoneId
-import java.util.UUID
 
 class TransactionViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -53,6 +50,16 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         refreshMonthlyTotal()
+
+        // 🔥 Warm up ML model in background (prevents first-run ANR)
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                TfidfClassifierProvider.get(getApplication())
+                Log.d("ML_INIT", "TF-IDF classifier loaded")
+            } catch (e: Exception) {
+                Log.e("ML_INIT", "Failed to init TF-IDF classifier", e)
+            }
+        }
     }
 
     // Recalculate whenever DB changes

@@ -3,6 +3,7 @@ package com.amaterasu.expense_tracker.worker
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresPermission
@@ -10,7 +11,9 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
+import com.amaterasu.expense_tracker.R
 import com.amaterasu.expense_tracker.data.database.RoomDatabaseProvider
 import com.amaterasu.expense_tracker.data.repository.TransactionRepository
 import com.amaterasu.expense_tracker.notification.NotificationHelper
@@ -21,34 +24,36 @@ class SmsImportWorker (
     context: Context,
     params: WorkerParameters
 ) : CoroutineWorker(context, params) {
+
     override suspend fun doWork(): Result {
 
-        Log.d("SMS_WORKER", "Worker Started");
+        Log.d("SMS_WORKER", "Worker Started")
 
         if (!SmsPermission.hasPermission(applicationContext)) {
-            Log.d("SMS_WORKER", "SMS permission not granted can't process");
-            return Result.success();
+            Log.d("SMS_WORKER", "SMS permission not granted can't process")
+            return Result.success()
         }
 
-        showNotification("Importing transactions in background");
+        val isUserTriggered = tags.contains("USER_TRIGGERED")
 
-        try {
-            val importUseCase = ImportSmsTransactionsUseCase(applicationContext,);
-            val db = RoomDatabaseProvider.get(applicationContext);
-            val repository = TransactionRepository(db.TransactionDao());
+        if (isUserTriggered) {
+            // ✅ Foreground only for user action
+            setForeground(createForegroundInfo("Importing transactions…"))
+        }
 
-            val transactions = importUseCase.execute();
+        return try {
+            val importUseCase = ImportSmsTransactionsUseCase(applicationContext)
+            val db = RoomDatabaseProvider.get(applicationContext)
+            val repository = TransactionRepository(db.TransactionDao())
 
-            Log.d("SMS_WORKER", "Parsed ${transactions.size} transactions");
+            val transactions = importUseCase.execute()
+            Log.d("SMS_WORKER", "Parsed ${transactions.size} transactions")
 
-            repository.saveAll(transactions);
-
-            dismissNotification();
-
-            return Result.success();
-        } catch (e : Exception) {
-            Log.e("SMS_WORKER", "Worker failed", e);
-            return Result.retry();
+            repository.saveAll(transactions)
+            Result.success()
+        } catch (e: Exception) {
+            Log.e("SMS_WORKER", "Worker failed", e)
+            Result.retry()
         }
     }
 
@@ -64,6 +69,7 @@ class SmsImportWorker (
             applicationContext,
             NotificationHelper.CHANNEL_ID
         )
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle("Expense Tracker")
             .setContentText(text)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -91,4 +97,22 @@ class SmsImportWorker (
         }
     }
 
+    private fun createForegroundInfo(text: String): ForegroundInfo {
+        val notification = NotificationCompat.Builder(applicationContext, NotificationHelper.CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle("Expense Tracker")
+            .setContentText(text)
+            .setOngoing(true)
+            .build()
+
+        return if (Build.VERSION.SDK_INT >= 29) {
+            ForegroundInfo(
+                1001,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
+        } else {
+            ForegroundInfo(1001, notification)
+        }
+    }
 }
