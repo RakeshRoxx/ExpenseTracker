@@ -27,7 +27,8 @@ class HdfcSmsParser : BankSmsParser() {
             parsingTimestamp = timestamp,
             category = Category.OTHER,
             source = TransactionSource.SMS,
-            sourceBank = "HDFC"
+            sourceBank = "HDFC",
+            rawSmsBody = sms
         )
     }
 }

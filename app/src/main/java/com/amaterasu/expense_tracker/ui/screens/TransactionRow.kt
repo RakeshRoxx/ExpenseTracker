@@ -1,6 +1,6 @@
 package com.amaterasu.expense_tracker.ui.screens
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.amaterasu.expense_tracker.data.entity.TransactionEntity
@@ -25,14 +26,20 @@ import utils.Utils
 @Composable
 fun TransactionRow(
     tx: TransactionEntity,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onLongPress: () -> Unit
 ) {
     val amountColor = if (tx.type == "DEBIT") Color(0xFFC62828) else Color(0xFF2E7D32)
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .pointerInput(tx.id) {
+                detectTapGestures(
+                    onTap = { onClick() },
+                    onLongPress = { onLongPress() }
+                )
+            }
             .padding(horizontal = 12.dp, vertical = 6.dp),
         shape = RoundedCornerShape(18.dp),
         elevation = CardDefaults.cardElevation(3.dp),

@@ -13,5 +13,6 @@ fun Transaction.toEntity(): TransactionEntity = TransactionEntity(
     category = category.name,
     source = source.name,
     accountHint = accountHint,
-    sourceBank = sourceBank
+    sourceBank = sourceBank,
+    rawSmsBody = rawSmsBody
 )

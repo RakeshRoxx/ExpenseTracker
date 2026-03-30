@@ -33,7 +33,8 @@ class IciciSmsParser : BankSmsParser() {
             parsingTimestamp = timestamp,
             category = Category.OTHER,
             source = TransactionSource.SMS,
-            sourceBank = "ICICI"
+            sourceBank = "ICICI",
+            rawSmsBody = sms
         )
 
         Log.d("ICICI_SMS_PARSER", tx.toString());

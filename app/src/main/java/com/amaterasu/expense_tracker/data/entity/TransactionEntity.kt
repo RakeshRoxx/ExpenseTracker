@@ -16,5 +16,6 @@ data class TransactionEntity (
     val category: String,
     val source: String,
     val accountHint: String?,
-    val sourceBank: String
+    val sourceBank: String,
+    val rawSmsBody: String? = null
 )

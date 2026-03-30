@@ -8,7 +8,7 @@ import com.amaterasu.expense_tracker.data.entity.TransactionEntity
 
 @Database(
     entities = [TransactionEntity::class],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 abstract class RoomDatabase : RoomDatabase() {

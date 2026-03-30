@@ -21,6 +21,7 @@ fun TransactionListScreen(
 ) {
     val transactions by viewModel.transactions.collectAsState()
     var selectedTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
+    var smsPreviewTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -29,7 +30,8 @@ fun TransactionListScreen(
             items(transactions, key = { it.id }) { tx ->
                 TransactionRow(
                     tx = tx,
-                    onClick = { selectedTransaction = tx }
+                    onClick = { selectedTransaction = tx },
+                    onLongPress = { smsPreviewTransaction = tx }
                 )
             }
         }
@@ -42,6 +44,13 @@ fun TransactionListScreen(
                     viewModel.updateTransaction(updatedTransaction)
                     selectedTransaction = null
                 }
+            )
+        }
+
+        smsPreviewTransaction?.let { tx ->
+            TransactionSmsDialog(
+                transaction = tx,
+                onDismiss = { smsPreviewTransaction = null }
             )
         }
     }

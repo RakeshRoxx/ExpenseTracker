@@ -50,6 +50,7 @@ fun DashboardScreen(
     val monthlyTotal by viewModel.monthlyTotal.collectAsState()
     val refreshing = viewModel.isRefreshing
     var selectedTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
+    var smsPreviewTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     val groupedTransactions = remember(transactions) {
         transactions.groupBy { transaction ->
             Instant.ofEpochMilli(transaction.smsReceivedTimestamp)
@@ -107,7 +108,8 @@ fun DashboardScreen(
                             items(monthTransactions, key = { it.id }) { tx ->
                                 TransactionRow(
                                     tx = tx,
-                                    onClick = { selectedTransaction = tx }
+                                    onClick = { selectedTransaction = tx },
+                                    onLongPress = { smsPreviewTransaction = tx }
                                 )
                             }
                         }
@@ -123,6 +125,13 @@ fun DashboardScreen(
                         viewModel.updateTransaction(updatedTransaction)
                         selectedTransaction = null
                     }
+                )
+            }
+
+            smsPreviewTransaction?.let { tx ->
+                TransactionSmsDialog(
+                    transaction = tx,
+                    onDismiss = { smsPreviewTransaction = null }
                 )
             }
         }

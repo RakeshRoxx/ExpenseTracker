@@ -13,5 +13,6 @@ data class Transaction (
     val category: Category,
     val source: TransactionSource,
     val accountHint: String? = null,
-    val sourceBank: String
+    val sourceBank: String,
+    val rawSmsBody: String? = null
 )

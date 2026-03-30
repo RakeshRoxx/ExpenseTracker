@@ -2,6 +2,7 @@ package com.amaterasu.expense_tracker.sms
 
 import domain.Transaction
 import parser.AxisSmsParser
+import parser.DefaultSMSParser
 import parser.HdfcSmsParser
 import parser.IciciSmsParser
 import parser.SmsParserEngine
@@ -12,7 +13,8 @@ class SmsProcessor {
         listOf(
             HdfcSmsParser(),
             AxisSmsParser(),
-            IciciSmsParser()
+            IciciSmsParser(),
+            DefaultSMSParser()
         )
     )
 

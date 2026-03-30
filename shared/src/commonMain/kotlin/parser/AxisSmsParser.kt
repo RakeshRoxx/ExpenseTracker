@@ -36,7 +36,8 @@ class AxisSmsParser : BankSmsParser() {
             parsingTimestamp = System.currentTimeMillis(),
             category = Category.OTHER,
             source = TransactionSource.SMS,
-            sourceBank = "AXIS"
+            sourceBank = "AXIS",
+            rawSmsBody = sms
         )
 
         val formatedDate = Utils.formatTimeStamp(timestamp);
