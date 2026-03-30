@@ -22,7 +22,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("boolean", "TEST_REIMPORT_ON_LAUNCH", "true")
+        }
         release {
+            buildConfigField("boolean", "TEST_REIMPORT_ON_LAUNCH", "false")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

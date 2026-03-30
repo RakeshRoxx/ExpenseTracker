@@ -11,6 +11,10 @@ class TransactionRepository (private val dao: TransactionDao) {
         dao.insertAll(transaction.map { it.toEntity() })
     }
 
+    suspend fun clearAll() {
+        dao.deleteAll()
+    }
+
     suspend fun updateTransaction(transaction: TransactionEntity) {
         dao.updateTransaction(transaction)
     }

@@ -7,11 +7,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.amaterasu.expense_tracker.BuildConfig
 import com.amaterasu.expense_tracker.data.database.RoomDatabaseProvider
 import com.amaterasu.expense_tracker.data.entity.TransactionEntity
 import com.amaterasu.expense_tracker.data.repository.TransactionRepository
 import com.amaterasu.expense_tracker.ml.TfidfClassifierProvider
 import com.amaterasu.expense_tracker.sms.SmsExporter
+import com.amaterasu.expense_tracker.sms.SmsPermission
+import com.amaterasu.expense_tracker.sms.SmsSyncStore
 import com.amaterasu.expense_tracker.usecase.ImportSmsTransactionsUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,6 +51,8 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
     var isRefreshing by mutableStateOf(false)
         private set
 
+    private var launchTestImportRan = false
+
     init {
         refreshMonthlyTotal()
 
@@ -58,6 +63,29 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
                 Log.d("ML_INIT", "TF-IDF classifier loaded")
             } catch (e: Exception) {
                 Log.e("ML_INIT", "Failed to init TF-IDF classifier", e)
+            }
+        }
+    }
+
+    fun runLaunchTestImportIfEnabled() {
+        if (!BuildConfig.TEST_REIMPORT_ON_LAUNCH || launchTestImportRan) return
+        if (!SmsPermission.hasPermission(getApplication())) return
+
+        launchTestImportRan = true
+
+        viewModelScope.launch {
+            try {
+                isRefreshing = true
+                repo.clearAll()
+                SmsSyncStore.reset(getApplication())
+
+                val newTransactions = importUseCase.execute()
+                repo.saveAll(newTransactions)
+                refreshMonthlyTotal()
+            } catch (e: Exception) {
+                Log.e("TransactionViewModel", "Launch test import failed", e)
+            } finally {
+                isRefreshing = false
             }
         }
     }

@@ -28,7 +28,7 @@ class IciciSmsParser : BankSmsParser() {
         val tx = Transaction(
             id = "$timestamp-$amount",
             amount = amount,
-            type = TransactionType.DEBIT,
+            type = extractTransactionType(sms),
             merchant = merchant,
             smsReceivedTimestamp = timestamp,
             parsingTimestamp = timestamp,
