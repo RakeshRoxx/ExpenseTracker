@@ -21,14 +21,13 @@ class IciciSmsParser : BankSmsParser() {
             return null;
         }
 
-        val merchant = Regex("at\\s([A-Z0-9 ]+)")
-            .find(sms)?.groupValues?.get(1)
-            ?: "Unknown"
+        val txType = extractTransactionType(sms)
+        val merchant = MerchantExtractor.extract(sms, txType) ?: "Unknown"
 
         val tx = Transaction(
             id = "$timestamp-$amount",
             amount = amount,
-            type = extractTransactionType(sms),
+            type = txType,
             merchant = merchant,
             smsReceivedTimestamp = timestamp,
             parsingTimestamp = timestamp,

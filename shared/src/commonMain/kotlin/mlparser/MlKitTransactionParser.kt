@@ -5,7 +5,9 @@ import com.google.mlkit.nl.entityextraction.EntityExtraction
 import com.google.mlkit.nl.entityextraction.EntityExtractionParams
 import com.google.mlkit.nl.entityextraction.EntityExtractorOptions
 import domain.MLParsedTransaction
+import domain.TransactionType
 import kotlinx.coroutines.tasks.await
+import parser.MerchantExtractor
 
 
 class MlKitTransactionParser {
@@ -38,11 +40,11 @@ class MlKitTransactionParser {
             }
         }
 
-        val merchant = extractMerchantHeuristically(sms) ?: extractMerchantFallback(sms)
-
         val isDebit = sms.contains("debit", true) ||
                 sms.contains("spent", true) ||
                 sms.contains("paid", true)
+        val transactionType = if (isDebit) TransactionType.DEBIT else TransactionType.CREDIT
+        val merchant = MerchantExtractor.extract(sms, transactionType) ?: extractMerchantFallback(sms)
 
         return MLParsedTransaction(
             amount = amount,
@@ -50,16 +52,6 @@ class MlKitTransactionParser {
             timestamp = timestamp,
             isDebit = isDebit
         )
-    }
-
-    private fun extractMerchantHeuristically(sms: String): String? {
-        val patterns = listOf(
-            Regex("at\\s+([A-Z0-9 _.-]+)", RegexOption.IGNORE_CASE),
-            Regex("to\\s+([A-Z0-9 _.-]+)", RegexOption.IGNORE_CASE),
-            Regex("@([A-Z0-9 _.-]+)"),
-            Regex("via\\s+([A-Z0-9 _.-]+)", RegexOption.IGNORE_CASE)
-        )
-        return patterns.firstNotNullOfOrNull { it.find(sms)?.groupValues?.get(1)?.trim() }
     }
 
     private fun extractMerchantFallback(sms: String): String? {

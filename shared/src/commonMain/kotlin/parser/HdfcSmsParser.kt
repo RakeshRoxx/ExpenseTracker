@@ -15,15 +15,13 @@ class HdfcSmsParser : BankSmsParser() {
         Log.d("HDFC_SMS_PARSER", sms);
 
         val amount = extractAmount(sms) ?: return null
-
-        val merchant = Regex("at\\s([A-Z0-9 ]+)")
-            .find(sms)?.groupValues?.get(1)
-            ?: "Unknown"
+        val txType = extractTransactionType(sms)
+        val merchant = MerchantExtractor.extract(sms, txType) ?: "Unknown"
 
         return Transaction(
             id = "$timestamp-$amount",
             amount = amount,
-            type = extractTransactionType(sms),
+            type = txType,
             merchant = merchant,
             smsReceivedTimestamp = timestamp,
             parsingTimestamp = timestamp,
