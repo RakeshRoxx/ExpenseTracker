@@ -141,6 +141,17 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun deleteTransaction(transaction: TransactionEntity) {
+        viewModelScope.launch {
+            try {
+                repo.deleteTransaction(transaction)
+                refreshMonthlyTotal()
+            } catch (e: Exception) {
+                Log.e("TransactionViewModel", "Delete failed", e)
+            }
+        }
+    }
+
     private fun stableIdFromJson(
         amount: Double,
         merchant: String,

@@ -19,6 +19,10 @@ class TransactionRepository (private val dao: TransactionDao) {
         dao.updateTransaction(transaction)
     }
 
+    suspend fun deleteTransaction(transaction: TransactionEntity) {
+        dao.deleteTransaction(transaction)
+    }
+
     suspend fun totalAmountByDate(start: Long, end: Long) : Double {
         return dao.totalSpendByDate(start, end);
     }

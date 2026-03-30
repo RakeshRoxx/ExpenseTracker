@@ -1,6 +1,7 @@
 package com.amaterasu.expense_tracker.data.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -21,6 +22,9 @@ interface TransactionDao {
 
     @Query("DELETE FROM transactions")
     suspend fun deleteAll()
+
+    @Delete
+    suspend fun deleteTransaction(transaction: TransactionEntity)
 
     @Query("""SELECT IFNULL(SUM(amount), 0) 
         FROM transactions

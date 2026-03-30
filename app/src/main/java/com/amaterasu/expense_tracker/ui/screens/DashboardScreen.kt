@@ -109,7 +109,12 @@ fun DashboardScreen(
                                 TransactionRow(
                                     tx = tx,
                                     onClick = { selectedTransaction = tx },
-                                    onLongPress = { smsPreviewTransaction = tx }
+                                    onLongPress = { smsPreviewTransaction = tx },
+                                    onDelete = {
+                                        if (selectedTransaction?.id == tx.id) selectedTransaction = null
+                                        if (smsPreviewTransaction?.id == tx.id) smsPreviewTransaction = null
+                                        viewModel.deleteTransaction(tx)
+                                    }
                                 )
                             }
                         }
