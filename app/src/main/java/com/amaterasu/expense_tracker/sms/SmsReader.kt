@@ -59,6 +59,7 @@ class SmsReader(private val context: Context) {
         sender: String,
         classifier: TfidfTransactionClassifier
     ): Boolean {
+        if (sender.contains("EPFO")) return false;
         if (sender.contains("-S") || sender.contains("-T")) return true
 
         return classifier.isTransaction(text, threshold = 0.65f)
