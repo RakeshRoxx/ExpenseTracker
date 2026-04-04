@@ -20,7 +20,7 @@ fun TransactionListScreen(
     viewModel: TransactionViewModel = viewModel()
 ) {
     val transactions by viewModel.transactions.collectAsState()
-    var selectedTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
+    var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     var smsPreviewTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -30,10 +30,10 @@ fun TransactionListScreen(
             items(transactions, key = { it.id }) { tx ->
                 TransactionRow(
                     tx = tx,
-                    onClick = { selectedTransaction = tx },
-                    onLongPress = { smsPreviewTransaction = tx },
+                    onClick = { smsPreviewTransaction = tx },
+                    onLongPress = { editingTransaction = tx },
                     onDelete = {
-                        if (selectedTransaction?.id == tx.id) selectedTransaction = null
+                        if (editingTransaction?.id == tx.id) editingTransaction = null
                         if (smsPreviewTransaction?.id == tx.id) smsPreviewTransaction = null
                         viewModel.deleteTransaction(tx)
                     }
@@ -41,13 +41,13 @@ fun TransactionListScreen(
             }
         }
 
-        selectedTransaction?.let { tx ->
+        editingTransaction?.let { tx ->
             EditTransactionDialog(
                 transaction = tx,
-                onDismiss = { selectedTransaction = null },
+                onDismiss = { editingTransaction = null },
                 onSave = { updatedTransaction ->
                     viewModel.updateTransaction(updatedTransaction)
-                    selectedTransaction = null
+                    editingTransaction = null
                 }
             )
         }

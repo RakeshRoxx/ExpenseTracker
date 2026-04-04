@@ -14,6 +14,9 @@ interface TransactionDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(transactions : List<TransactionEntity>);
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertTransaction(transaction: TransactionEntity)
+
     @Query("SELECT * FROM transactions ORDER BY smsReceivedTimestamp DESC")
     fun observeAll() : Flow<List<TransactionEntity>>
 

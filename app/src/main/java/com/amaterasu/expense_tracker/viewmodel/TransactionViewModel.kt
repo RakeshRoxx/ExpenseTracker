@@ -141,6 +141,43 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun addManualTransaction(
+        amount: Double,
+        type: String,
+        merchant: String,
+        sourceBank: String
+    ) {
+        viewModelScope.launch {
+            try {
+                val now = System.currentTimeMillis()
+                val resolvedSourceBank = sourceBank.trim().ifBlank { "God's Plan" }
+                repo.addTransaction(
+                    TransactionEntity(
+                        id = stableIdFromJson(
+                            amount = amount,
+                            merchant = merchant.trim(),
+                            smsTimestamp = now,
+                            type = type
+                        ),
+                        amount = amount,
+                        type = type,
+                        merchant = merchant.trim(),
+                        smsReceivedTimestamp = now,
+                        parsingTimestamp = now,
+                        category = "OTHER",
+                        source = "MANUAL",
+                        accountHint = null,
+                        sourceBank = resolvedSourceBank,
+                        rawSmsBody = null
+                    )
+                )
+                refreshMonthlyTotal()
+            } catch (e: Exception) {
+                Log.e("TransactionViewModel", "Manual insert failed", e)
+            }
+        }
+    }
+
     fun deleteTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
             try {
