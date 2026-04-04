@@ -26,7 +26,11 @@ class MainActivity : ComponentActivity() {
     private val smsPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             if (granted) {
-                maybeRequestNotificationPermission()
+                if (WorkScheduler.backgroundSmsWorkerEnabled) {
+                    maybeRequestNotificationPermission()
+                } else {
+                    Log.d("PERMISSION", "READ_SMS granted")
+                }
             } else {
                 Log.w("PERMISSION", "READ_SMS denied")
             }
@@ -52,7 +56,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
-        NotificationHelper.createChannel(this)
+        if (WorkScheduler.backgroundSmsWorkerEnabled) {
+            NotificationHelper.createChannel(this)
+        }
 
         setContent {
             ExpensetrackerTheme {
@@ -69,14 +75,14 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun requestPermissionsInOrder() {
-        // 1️⃣ SMS permission
         if (!SmsPermission.hasPermission(this)) {
             smsPermissionLauncher.launch(Manifest.permission.READ_SMS)
             return
         }
 
-        // 2️⃣ Notification permission (Android 13+)
-        maybeRequestNotificationPermission()
+        if (WorkScheduler.backgroundSmsWorkerEnabled) {
+            maybeRequestNotificationPermission()
+        }
     }
 
     private fun maybeRequestNotificationPermission() {

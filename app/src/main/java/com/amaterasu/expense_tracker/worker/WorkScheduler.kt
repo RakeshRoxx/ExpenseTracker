@@ -10,9 +10,15 @@ import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
 
 object WorkScheduler {
+    const val backgroundSmsWorkerEnabled = false
     private const val WORK_NAME = "sms_import_worker"
 
     fun schedule(context: Context) {
+        if (!backgroundSmsWorkerEnabled) {
+            Log.d("WORK_SCHEDULER", "Background SMS worker disabled by flag")
+            return
+        }
+
         val constraints = Constraints.Builder()
             .setRequiresBatteryNotLow(true)
             .build()
@@ -33,6 +39,11 @@ object WorkScheduler {
 
     // ✅ User-triggered run → allow Foreground Service
     fun runOnceFromUser(context: Context) {
+        if (!backgroundSmsWorkerEnabled) {
+            Log.d("WORK_SCHEDULER", "Background SMS worker disabled by flag")
+            return
+        }
+
         Log.d("WORKER_RUN_ONCE", "User triggered run")
 
         val request = OneTimeWorkRequestBuilder<SmsImportWorker>()
