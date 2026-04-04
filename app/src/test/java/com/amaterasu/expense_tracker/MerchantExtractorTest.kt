@@ -61,4 +61,22 @@ class MerchantExtractorTest {
 
         assertNull(merchant)
     }
+
+    @Test
+    fun doesNotTreatUpiHandleAsMerchant() {
+        val sms = "Rs. 340 sent to 9988776655@oksbi on 21-Mar-26. UPI Ref 123456789"
+
+        val merchant = MerchantExtractor.extract(sms, TransactionType.DEBIT)
+
+        assertNull(merchant)
+    }
+
+    @Test
+    fun doesNotTreatMixedAlphaNumericReferenceAsMerchant() {
+        val sms = "ICICI Bank Credit Card XX1006 debited for INR 90.00 on 23-Feb-26 for UPI-XXXX-AB12CD34. To dispute call XXXX"
+
+        val merchant = MerchantExtractor.extract(sms, TransactionType.DEBIT)
+
+        assertNull(merchant)
+    }
 }

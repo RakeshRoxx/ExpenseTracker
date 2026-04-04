@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ExpensePieChart(total: Double) {
-    val sweepAngle = if (total > 0) 270f else 18f
+    val sweepAngle = if (total != 0.0) 270f else 18f
 
     Canvas(
         modifier = Modifier.size(104.dp)

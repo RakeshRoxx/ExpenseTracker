@@ -29,11 +29,16 @@ interface TransactionDao {
     @Delete
     suspend fun deleteTransaction(transaction: TransactionEntity)
 
-    @Query("""SELECT IFNULL(SUM(amount), 0) 
+    @Query("""SELECT IFNULL(SUM(
+            CASE
+                WHEN type = 'DEBIT' THEN amount
+                WHEN type = 'CREDIT' THEN -amount
+                ELSE 0
+            END
+        ), 0)
         FROM transactions
-        WHERE type = 'DEBIT'
-        AND smsReceivedTimestamp BETWEEN :start and :end""")
-    suspend fun totalSpendByDate(start: Long, end: Long) : Double
+        WHERE smsReceivedTimestamp BETWEEN :start and :end""")
+    suspend fun netAmountByDate(start: Long, end: Long) : Double
 
     @Update
     suspend fun updateTransaction(transaction: TransactionEntity)

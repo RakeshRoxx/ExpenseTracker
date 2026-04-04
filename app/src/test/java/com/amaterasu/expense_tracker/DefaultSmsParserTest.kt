@@ -6,6 +6,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 import parser.DefaultSMSParser
+import parser.HdfcSmsParser
 
 class DefaultSmsParserTest {
 
@@ -44,5 +45,61 @@ class DefaultSmsParserTest {
         val result = parser.parse(sms, 1710000000000, "VM-BOBCRD-S")
 
         assertNull(result)
+    }
+
+    @Test
+    fun usesGenericLabelForLowConfidenceUpiDebit() {
+        val sms = "Rs. 340 sent to 9988776655@oksbi on 21-Mar-26. UPI Ref 123456789"
+
+        val result = parser.parse(sms, 1710000000000, "VK-SBIINB-S")
+
+        assertNotNull(result)
+        assertEquals(TransactionType.DEBIT, result?.type)
+        assertEquals("UPI Transfer", result?.merchant)
+    }
+
+    @Test
+    fun usesGenericLabelForLowConfidenceUpiCredit() {
+        val sms = "Rs. 428 received in a/c xx7567 on 13-Feb-25 from 9988776655@oksbi (UPI Ref: XXXX)"
+
+        val result = parser.parse(sms, 1710000000000, "VM-SLICE-S")
+
+        assertNotNull(result)
+        assertEquals(TransactionType.CREDIT, result?.type)
+        assertEquals("UPI Credit", result?.merchant)
+    }
+
+    @Test
+    fun usesFallbackLabelForAmbiguousDebitWithoutMerchant() {
+        val sms = "Your account XX1234 has been debited by INR 120.00 on 21-Mar-26. Avl bal INR 850.00"
+
+        val result = parser.parse(sms, 1710000000000, "VM-TEST-S")
+
+        assertNotNull(result)
+        assertEquals(TransactionType.DEBIT, result?.type)
+        assertEquals("Bank Debit", result?.merchant)
+    }
+
+    @Test
+    fun usesFallbackLabelForAmbiguousCreditWithoutMerchant() {
+        val sms = "INR 120.00 credited to your account XX1234 on 21-Mar-26. Avl bal INR 850.00"
+
+        val result = parser.parse(sms, 1710000000000, "VM-TEST-S")
+
+        assertNotNull(result)
+        assertEquals(TransactionType.CREDIT, result?.type)
+        assertEquals("Bank Credit", result?.merchant)
+    }
+
+    @Test
+    fun bankSpecificParserUsesCleanGenericLabelInsteadOfUnknown() {
+        val parser = HdfcSmsParser()
+        val sms = "Your HDFC Bank credit card XX1234 is used at POS for INR 499.00 on 08/05/25."
+
+        val result = parser.parse(sms, 1710000000000, "VM-HDFCBK-S")
+
+        assertNotNull(result)
+        assertEquals(TransactionType.DEBIT, result?.type)
+        assertEquals("Card Spend", result?.merchant)
     }
 }

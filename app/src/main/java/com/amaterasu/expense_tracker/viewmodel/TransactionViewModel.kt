@@ -104,7 +104,7 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
                 .toEpochSecond() * 1000
 
             _monthlyTotal.value = repo.totalAmountByDate(start, end)
-            Log.d("TransactionViewModel", "Total Monthly Expense ${_monthlyTotal.value}")
+            Log.d("TransactionViewModel", "Net Monthly Amount ${_monthlyTotal.value}")
         }
     }
 

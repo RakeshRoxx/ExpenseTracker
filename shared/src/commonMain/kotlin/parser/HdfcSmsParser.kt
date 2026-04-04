@@ -16,7 +16,8 @@ class HdfcSmsParser : BankSmsParser() {
 
         val amount = extractAmount(sms) ?: return null
         val txType = extractTransactionType(sms)
-        val merchant = MerchantExtractor.extract(sms, txType) ?: "Unknown"
+        val merchant = MerchantLabelResolver.resolve(sms, txType).displayName
+            ?: if (txType == TransactionType.DEBIT) "Bank Debit" else "Bank Credit"
 
         return Transaction(
             id = "$timestamp-$amount",

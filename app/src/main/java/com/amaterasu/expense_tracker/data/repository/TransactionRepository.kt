@@ -28,7 +28,7 @@ class TransactionRepository (private val dao: TransactionDao) {
     }
 
     suspend fun totalAmountByDate(start: Long, end: Long) : Double {
-        return dao.totalSpendByDate(start, end);
+        return dao.netAmountByDate(start, end);
     }
 
     fun observeAll() : Flow<List<TransactionEntity>>{

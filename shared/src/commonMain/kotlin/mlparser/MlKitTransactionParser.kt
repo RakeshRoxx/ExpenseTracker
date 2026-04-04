@@ -7,7 +7,7 @@ import com.google.mlkit.nl.entityextraction.EntityExtractorOptions
 import domain.MLParsedTransaction
 import domain.TransactionType
 import kotlinx.coroutines.tasks.await
-import parser.MerchantExtractor
+import parser.MerchantLabelResolver
 
 
 class MlKitTransactionParser {
@@ -44,7 +44,8 @@ class MlKitTransactionParser {
                 sms.contains("spent", true) ||
                 sms.contains("paid", true)
         val transactionType = if (isDebit) TransactionType.DEBIT else TransactionType.CREDIT
-        val merchant = MerchantExtractor.extract(sms, transactionType) ?: extractMerchantFallback(sms)
+        val merchant = MerchantLabelResolver.resolve(sms, transactionType).displayName
+            ?: extractMerchantFallback(sms)
 
         return MLParsedTransaction(
             amount = amount,

@@ -25,7 +25,8 @@ class AxisSmsParser : BankSmsParser() {
         }
 
         val txType = extractTransactionType(sms)
-        val merchant = MerchantExtractor.extract(sms, txType) ?: "Unknown"
+        val merchant = MerchantLabelResolver.resolve(sms, txType).displayName
+            ?: if (txType == TransactionType.DEBIT) "Bank Debit" else "Bank Credit"
 
         val tx = Transaction(
             id = "$timestamp-$amount",

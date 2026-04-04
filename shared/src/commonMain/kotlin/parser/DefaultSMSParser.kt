@@ -15,9 +15,8 @@ class DefaultSMSParser : BankSmsParser() {
         if (!isLikelyTransactionSms(sms)) return null
 
         val transactionType = extractTransactionType(sms)
-        val merchant = MerchantExtractor.extract(sms, transactionType)
-            ?: inferNarrationMerchant(sms, transactionType)
-            ?: "Unknown"
+        val merchant = MerchantLabelResolver.resolve(sms, transactionType).displayName
+            ?: if (transactionType == TransactionType.DEBIT) "Bank Debit" else "Bank Credit"
 
         return Transaction(
             id = "$timestamp-$amount-$sender",
@@ -83,24 +82,6 @@ class DefaultSMSParser : BankSmsParser() {
         )
 
         return positivePatterns.any { Regex(it).containsMatchIn(normalized) }
-    }
-
-    private fun inferNarrationMerchant(sms: String, transactionType: TransactionType): String? {
-        val normalized = sms.lowercase()
-
-        return when {
-            "atm" in normalized && transactionType == TransactionType.DEBIT -> "ATM Withdrawal"
-            "cash deposit" in normalized -> "Cash Deposit"
-            "salary" in normalized && transactionType == TransactionType.CREDIT -> "Salary"
-            "refund" in normalized -> "Refund"
-            "nach" in normalized -> "NACH"
-            "upi" in normalized -> "UPI Transfer"
-            "imps" in normalized -> "IMPS Transfer"
-            "neft" in normalized -> "NEFT Transfer"
-            "rtgs" in normalized -> "RTGS Transfer"
-            "emi" in normalized || "autopay" in normalized -> "EMI/Autopay"
-            else -> null
-        }
     }
 
     private fun extractAccountHint(sms: String): String? {

@@ -58,7 +58,7 @@ fun MonthlyPieHeader(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Current month spending",
+                    text = "Current month net amount",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
