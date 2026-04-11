@@ -16,6 +16,9 @@ object SmsSyncStore {
         }
 
         val sp = context.getSharedPreferences(PREF, Context.MODE_PRIVATE);
+        /* For first time setup it should get only current month data */
+        if (sp.getLong(KEY_LAST_TS, 0L) == 0L) return currentMonthStartInIst();
+
         return sp.getLong(KEY_LAST_TS, 0L);
     }
 
