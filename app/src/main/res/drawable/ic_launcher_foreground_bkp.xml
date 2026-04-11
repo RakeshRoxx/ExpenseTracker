@@ -1,0 +1,43 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Outer Circle -->
+    <path
+        android:strokeColor="#00FF88"
+        android:strokeWidth="3"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M54,6 A48,48 0 1,1 53.9,6"/>
+
+    <!-- Inner Circle -->
+    <path
+        android:strokeColor="#00FF88"
+        android:strokeWidth="2"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M54,18 A36,36 0 1,1 53.9,18"/>
+
+    <!-- Crosshair -->
+    <path
+        android:strokeColor="#00FF88"
+        android:strokeWidth="2"
+        android:pathData="M54,10 L54,98 M10,54 L98,54"/>
+
+    <!-- Radar Sweep (triangle approximation) -->
+    <path
+        android:fillColor="#66FF66"
+        android:fillAlpha="0.5"
+        android:pathData="M54,54 L90,40 L80,20 Z"/>
+
+    <!-- Rupee Symbol (approx) -->
+    <path
+        android:fillColor="#00FF88"
+        android:pathData="
+            M38,40 H70
+            M38,48 H65
+            M48,40 V72
+            M48,58 L70,72
+        "/>
+
+</vector>

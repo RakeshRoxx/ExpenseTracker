@@ -12,7 +12,7 @@ object NotificationHelper {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Transaction Import",
+                "Rupee Radar Sync",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = "Background Import Of Bank Transactions";

@@ -70,7 +70,7 @@ class SmsImportWorker (
             NotificationHelper.CHANNEL_ID
         )
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("Expense Tracker")
+            .setContentTitle(applicationContext.getString(R.string.app_name))
             .setContentText(text)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)
@@ -100,7 +100,7 @@ class SmsImportWorker (
     private fun createForegroundInfo(text: String): ForegroundInfo {
         val notification = NotificationCompat.Builder(applicationContext, NotificationHelper.CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("Expense Tracker")
+            .setContentTitle(applicationContext.getString(R.string.app_name))
             .setContentText(text)
             .setOngoing(true)
             .build()
