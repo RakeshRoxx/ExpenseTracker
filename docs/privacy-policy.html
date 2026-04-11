@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rupee Radar Privacy Policy</title>
+  <style>
+    :root {
+      --bg: #0b1324;
+      --card: #111c34;
+      --muted: #97a6ba;
+      --text: #f8fafc;
+      --accent: #f59e0b;
+      --line: #22314d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Noto Sans", sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(245, 158, 11, 0.14), transparent 26%),
+        linear-gradient(180deg, #0b1324 0%, #0f172a 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    main {
+      width: min(860px, calc(100% - 32px));
+      margin: 48px auto;
+      background: rgba(17, 28, 52, 0.9);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 32px 24px;
+      backdrop-filter: blur(8px);
+    }
+
+    h1, h2 {
+      line-height: 1.2;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 4vw, 3rem);
+    }
+
+    h2 {
+      margin-top: 32px;
+      font-size: 1.2rem;
+    }
+
+    p, li {
+      color: var(--text);
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .summary {
+      margin: 24px 0;
+      padding: 20px;
+      border-radius: 18px;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    a {
+      color: #fcd34d;
+    }
+
+    code {
+      font-family: "JetBrains Mono", "Fira Code", monospace;
+      color: #fde68a;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Rupee Radar Privacy Policy</h1>
+    <p class="muted">Last updated: April 11, 2026</p>
+
+    <p>Rupee Radar is an Android app that helps users identify and track transaction-related SMS messages on their device. This Privacy Policy explains what the app accesses, how data is handled, and what choices users have.</p>
+
+    <section class="summary">
+      <strong>Summary</strong>
+      <ul>
+        <li>Rupee Radar reads SMS messages only after the user grants the <code>READ_SMS</code> permission.</li>
+        <li>SMS parsing and transaction classification are performed on-device.</li>
+        <li>The app does not request the <code>INTERNET</code> permission and does not send SMS content to a server.</li>
+        <li>Transaction data is stored locally on the device using the app's local database.</li>
+        <li>The app may show local notifications related to background SMS import.</li>
+        <li>The app includes an export feature that can write a masked SMS dataset file to app-specific external storage when the user triggers that action.</li>
+      </ul>
+    </section>
+
+    <h2>Information the App Accesses</h2>
+    <p>Rupee Radar may access SMS message bodies, sender or address fields, timestamps, and user-created or edited transaction records. This access is used to detect likely financial transactions, display them in the app, and let the user review or manage their records.</p>
+
+    <h2>How Data Is Used</h2>
+    <p>The app uses data to detect transaction-related SMS messages, extract transaction details, save transaction records locally, show transaction history and summaries, and schedule background imports and notifications.</p>
+
+    <h2>Data Storage</h2>
+    <ul>
+      <li>Transaction records are stored locally on the device in the app database.</li>
+      <li>The app may remember the last processed SMS timestamp locally so it can avoid reprocessing the same messages.</li>
+      <li>If the user uses the export feature, a masked dataset file may be created inside the app's external files directory on the device.</li>
+    </ul>
+
+    <h2>Data Sharing</h2>
+    <p>Rupee Radar does not sell personal data. Based on the current app build, the app does not send SMS content or transaction records to a remote server because it does not request network access.</p>
+    <p>Data may still be accessible to the user on their device, Android system backup and restore features if enabled, or third-party apps if the user manually shares exported files.</p>
+
+    <h2>Exported Files</h2>
+    <p>If the user runs the export feature, the app creates a JSONL file containing masked SMS data for review or training-related workflows. The export process attempts to anonymize phone numbers, account references, UPI-like identifiers, and other long numeric values before writing the file. Users are responsible for handling exported files carefully after export.</p>
+
+    <h2>Permissions</h2>
+    <ul>
+      <li><code>READ_SMS</code> to read transaction-related SMS messages</li>
+      <li><code>POST_NOTIFICATIONS</code> to show notification updates related to background work</li>
+      <li>foreground service permissions required by Android for background import behavior</li>
+    </ul>
+    <p>If SMS permission is denied, some core app functionality will not work.</p>
+
+    <h2>Children</h2>
+    <p>Rupee Radar is not directed to children under 13.</p>
+
+    <h2>Security</h2>
+    <p>The app relies on Android's app sandbox and stores data locally. No app can guarantee absolute security, so users should keep their device protected and avoid sharing exported files unnecessarily.</p>
+
+    <h2>Changes to This Policy</h2>
+    <p>This Privacy Policy may be updated when app behavior changes. The "Last updated" date will be revised when material changes are made.</p>
+
+    <h2>Contact</h2>
+    <p>Replace this section with a real support email or website before public release.</p>
+  </main>
+</body>
+</html>
