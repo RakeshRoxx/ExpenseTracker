@@ -33,13 +33,13 @@ Once `keystore.properties` exists, the Gradle `release` build will use it automa
 Preferred command:
 
 ```bash
-./gradlew assembleRelease
+./gradlew renameReleaseApk
 ```
 
 Expected output:
 
 ```text
-app/build/outputs/apk/release/app-release.apk
+app/build/renamed-apk/release/RupeeRadar-v<versionName>-<versionCode>-release.apk
 ```
 
 If you sign outside Gradle, use the SDK `apksigner` binary from your Android SDK `build-tools` directory.

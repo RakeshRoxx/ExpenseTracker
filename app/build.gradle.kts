@@ -12,6 +12,8 @@ val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties().takeIf { keystorePropertiesFile.exists() }?.apply {
     load(FileInputStream(keystorePropertiesFile))
 }
+val appVersionCode = 2
+val appVersionName = "1.0.1"
 
 android {
     namespace = "com.amaterasu.expense_tracker"
@@ -21,8 +23,8 @@ android {
         applicationId = "com.amaterasu.expense_tracker"
         minSdk = 30
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters += listOf("arm64-v8a")
@@ -121,4 +123,17 @@ dependencies {
 
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+val releaseApkFileName = "RupeeRadar-v${appVersionName}-${appVersionCode}-release.apk"
+
+tasks.register<Copy>("renameReleaseApk") {
+    dependsOn("assembleRelease")
+
+    from(layout.buildDirectory.dir("intermediates/apk/release")) {
+        include("*.apk")
+    }
+
+    into(layout.buildDirectory.dir("renamed-apk/release"))
+    rename { releaseApkFileName }
 }
