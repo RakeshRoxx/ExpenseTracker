@@ -56,6 +56,7 @@ sms_dataset_*.csv
 datasets/
 exports/
 training_data/
+llm-training-details/output/
 
 # ===== Python (if you add training scripts later) =====
 __pycache__/
