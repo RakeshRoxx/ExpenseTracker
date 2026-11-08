@@ -13,22 +13,22 @@ fun ExpensePieChart(total: Double) {
     val sweepAngle = if (total != 0.0) 270f else 18f
 
     Canvas(
-        modifier = Modifier.size(104.dp)
+        modifier = Modifier.size(92.dp)
     ) {
         drawArc(
-            color = Color(0xFFE8EAED),
+            color = Color.White.copy(alpha = 0.26f),
             startAngle = -90f,
             sweepAngle = 360f,
             useCenter = false,
-            style = Stroke(width = 18.dp.toPx())
+            style = Stroke(width = 14.dp.toPx())
         )
 
         drawArc(
-            color = Color(0xFFEF5350),
+            color = Color.White,
             startAngle = -90f,
             sweepAngle = sweepAngle,
             useCenter = false,
-            style = Stroke(width = 18.dp.toPx())
+            style = Stroke(width = 14.dp.toPx())
         )
     }
 }

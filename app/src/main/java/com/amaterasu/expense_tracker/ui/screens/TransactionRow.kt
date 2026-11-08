@@ -4,17 +4,20 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -23,6 +26,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
@@ -31,19 +35,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.amaterasu.expense_tracker.data.entity.TransactionEntity
+import com.amaterasu.expense_tracker.ui.theme.IncomeGreen
+import com.amaterasu.expense_tracker.ui.theme.PastelCoral
+import com.amaterasu.expense_tracker.ui.theme.SoftSky
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import utils.Utils
 
-private val rowOuterHorizontalPadding = 12.dp
-private val rowOuterVerticalPadding = 6.dp
-private val rowCornerRadius = 18.dp
+private val rowOuterHorizontalPadding = 16.dp
+private val rowOuterVerticalPadding = 5.dp
+private val rowCornerRadius = 22.dp
 private val deleteRevealColor = Color(0xFFB71C1C)
 private const val deleteFadeOutDurationMs = 500
 
@@ -54,8 +61,13 @@ fun TransactionRow(
     onClick: () -> Unit,
     onLongPress: () -> Unit,
     onDelete: () -> Unit
-    ) {
-    val amountColor = if (tx.type == "DEBIT") Color(0xFFC62828) else Color(0xFF2E7D32)
+) {
+    val isDebit = tx.type == "DEBIT"
+    val amountColor = if (isDebit) PastelCoral else IncomeGreen
+    val badgeColor = if (isDebit) Color(0xFFFFEFEC) else SoftSky
+    val badgeContentColor = if (isDebit) PastelCoral else MaterialTheme.colorScheme.primary
+    val merchantInitial = tx.merchant.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "•"
+    val transactionDetails = "${tx.sourceBank} · ${Utils.formatTimeStamp(tx.smsReceivedTimestamp)}"
     var isVisible by remember(tx.id) { mutableStateOf(true) }
     var isDeleting by remember(tx.id) { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -144,7 +156,8 @@ fun TransactionRow(
                         vertical = rowOuterVerticalPadding
                     ),
                 shape = RoundedCornerShape(rowCornerRadius),
-                elevation = CardDefaults.cardElevation(3.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
@@ -152,45 +165,72 @@ fun TransactionRow(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .padding(horizontal = 14.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .size(46.dp)
+                            .background(
+                                color = badgeColor,
+                                shape = RoundedCornerShape(15.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = merchantInitial,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = badgeContentColor
+                        )
+                    }
+
                     Column(
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(
                             text = tx.merchant,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(5.dp))
                         Text(
-                            text = tx.sourceBank,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.88f)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = Utils.formatTimeStamp(tx.smsReceivedTimestamp),
+                            text = transactionDetails,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
                         )
+                        if (isDebit && tx.category.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(7.dp))
+                            Surface(
+                                shape = RoundedCornerShape(50),
+                                color = badgeColor
+                            ) {
+                                Text(
+                                    text = tx.category
+                                        .trim()
+                                        .lowercase()
+                                        .replace('_', ' ')
+                                        .replaceFirstChar { it.titlecase() },
+                                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = badgeContentColor
+                                )
+                            }
+                        }
                     }
 
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
 
-                    Column(
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "₹${tx.amount}",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = amountColor
-                        )
-                    }
+                    Text(
+                        text = "${if (isDebit) "−" else "+"}₹${tx.amount}",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = amountColor
+                    )
                 }
             }
         }

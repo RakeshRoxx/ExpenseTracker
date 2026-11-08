@@ -25,8 +25,8 @@ private val DarkColorScheme = darkColorScheme(
 
 private val LightColorScheme = lightColorScheme(
     primary = SlateBlue,
-    secondary = SlateBlue,
-    tertiary = SlateBlue,
+    secondary = PastelCoral,
+    tertiary = IncomeGreen,
     background = MistBackground,
     surface = SoftSurface,
     surfaceVariant = SoftSurfaceVariant,

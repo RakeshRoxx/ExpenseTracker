@@ -1,5 +1,6 @@
 package com.amaterasu.expense_tracker.ui.screens
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.FilterChip
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -26,28 +28,58 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.amaterasu.expense_tracker.data.entity.TransactionEntity
+
+private fun categoryLabel(category: String): String =
+    category
+        .lowercase()
+        .replace('_', ' ')
+        .split(' ')
+        .filter { it.isNotBlank() }
+        .joinToString(" ") { word ->
+            word.replaceFirstChar { character -> character.titlecase() }
+        }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditTransactionDialog(
     transaction: TransactionEntity,
     onDismiss: () -> Unit,
-    onSave: (TransactionEntity) -> Unit
+    onSave: (TransactionEntity) -> Unit,
+    availableCategories: List<String> = emptyList()
 ) {
     var bankName by remember(transaction.id) { mutableStateOf(transaction.sourceBank) }
     var merchantName by remember(transaction.id) { mutableStateOf(transaction.merchant) }
     var amount by remember(transaction.id) { mutableStateOf(transaction.amount.toString()) }
     var amountError by remember(transaction.id) { mutableStateOf<String?>(null) }
+    var selectedCategory by remember(transaction.id) {
+        mutableStateOf(transaction.category.ifBlank { "OTHER" })
+    }
+    var newCategoryName by remember(transaction.id) { mutableStateOf("") }
+    var showNewCategoryInput by remember(transaction.id) { mutableStateOf(false) }
+    var customCategories by remember(transaction.id) { mutableStateOf(emptyList<String>()) }
 
     LaunchedEffect(transaction.id) {
         bankName = transaction.sourceBank
         merchantName = transaction.merchant
         amount = transaction.amount.toString()
         amountError = null
+        selectedCategory = transaction.category.ifBlank { "OTHER" }
+        newCategoryName = ""
+        showNewCategoryInput = false
+        customCategories = emptyList()
     }
+
+    val categoryOptions = (
+        listOf("FOOD", "TRAVEL", "SHOPPING", "BILLS", "ENTERTAINMENT", "HEALTH", "TRANSPORT", "OTHER") +
+            availableCategories + customCategories + selectedCategory
+        )
+        .map { it.trim() }
+        .filter { it.isNotBlank() }
+        .distinctBy { it.lowercase() }
 
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
@@ -117,6 +149,72 @@ fun EditTransactionDialog(
                 )
             }
 
+            if (transaction.type == "DEBIT") {
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(
+                    text = "Expense category",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    categoryOptions.forEach { option ->
+                        FilterChip(
+                            selected = selectedCategory.equals(option, ignoreCase = true),
+                            onClick = { selectedCategory = option },
+                            label = { Text(categoryLabel(option)) }
+                        )
+                    }
+                }
+
+                TextButton(
+                    onClick = { showNewCategoryInput = !showNewCategoryInput }
+                ) {
+                    Text(if (showNewCategoryInput) "Cancel" else "+ Add category")
+                }
+
+                if (showNewCategoryInput) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = newCategoryName,
+                            onValueChange = { newCategoryName = it },
+                            label = { Text("New category") },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            enabled = newCategoryName.isNotBlank(),
+                            onClick = {
+                                val newCategory = newCategoryName.trim()
+                                val existingCategory = categoryOptions.firstOrNull {
+                                    it.equals(newCategory, ignoreCase = true)
+                                }
+                                if (existingCategory == null) {
+                                    customCategories = customCategories + newCategory
+                                    selectedCategory = newCategory
+                                } else {
+                                    selectedCategory = existingCategory
+                                }
+                                newCategoryName = ""
+                                showNewCategoryInput = false
+                            }
+                        ) {
+                            Text("Add")
+                        }
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
 
             Row(
@@ -139,6 +237,11 @@ fun EditTransactionDialog(
                             transaction.copy(
                                 merchant = merchantName.trim().ifBlank { transaction.merchant },
                                 amount = parsedAmount,
+                                category = if (transaction.type == "DEBIT") {
+                                    selectedCategory
+                                } else {
+                                    transaction.category
+                                },
                                 sourceBank = bankName.trim().ifBlank { transaction.sourceBank }
                             )
                         )

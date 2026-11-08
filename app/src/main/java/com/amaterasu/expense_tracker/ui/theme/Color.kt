@@ -2,15 +2,17 @@ package com.amaterasu.expense_tracker.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val SlateBlue = Color(0xFF5B6CFF)
-val SoftSky = Color(0xFFD8DEFF)
+val SlateBlue = Color(0xFF7C3AED)
+val SoftSky = Color(0xFFEDE4FF)
+val PastelCoral = Color(0xFFFF755E)
+val IncomeGreen = Color(0xFF2E9D68)
 
-val MistBackground = Color(0xFFF5F7FB)
+val MistBackground = Color(0xFFF8F5FC)
 val SoftSurface = Color(0xFFFFFFFF)
-val SoftSurfaceVariant = Color(0xFFE8EDF5)
-val SoftOutline = Color(0xFFD3DAE6)
-val Ink = Color(0xFF1D2433)
-val MutedInk = Color(0xFF6A7486)
+val SoftSurfaceVariant = Color(0xFFF0EAF8)
+val SoftOutline = Color(0xFFE9E1F0)
+val Ink = Color(0xFF29243A)
+val MutedInk = Color(0xFF898396)
 
 val NightPrimary = Color(0xFFB9C2FF)
 val NightBackground = Color(0xFF11141B)

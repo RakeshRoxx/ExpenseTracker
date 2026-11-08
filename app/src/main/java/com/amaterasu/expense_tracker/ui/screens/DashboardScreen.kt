@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -29,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.amaterasu.expense_tracker.data.entity.TransactionEntity
@@ -55,6 +57,12 @@ fun DashboardScreen(
     var showAddTransactionSheet by remember { mutableStateOf(false) }
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     var smsPreviewTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
+    val availableCategories = remember(transactions) {
+        transactions
+            .map { it.category.trim() }
+            .filter { it.isNotBlank() }
+            .distinctBy { it.lowercase() }
+    }
     val groupedTransactions = remember(transactions) {
         transactions.groupBy { transaction ->
             Instant.ofEpochMilli(transaction.smsReceivedTimestamp)
@@ -74,14 +82,35 @@ fun DashboardScreen(
         isRefreshing = refreshing,
         onRefresh = { viewModel.refreshFromSms() },
         state = pullToRefreshState,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
-                contentPadding = PaddingValues(bottom = 96.dp)
+                contentPadding = PaddingValues(bottom = 112.dp)
             ) {
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 22.dp, vertical = 12.dp)
+                    ) {
+                        Text(
+                            text = "Hi, Buddy!",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Text(
+                            text = "Here’s your money at a glance",
+                            modifier = Modifier.padding(top = 3.dp),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
 
-                // 🔵 Header (Pie chart + total)
                 item {
                     MonthlyPieHeader(total = monthlyTotal)
                 }
@@ -89,6 +118,20 @@ fun DashboardScreen(
                 if (refreshing) {
                     item {
                         RefreshingHint()
+                    }
+                }
+
+                if (groupedTransactions.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "Transactions",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 10.dp),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
                     }
                 }
 
@@ -131,6 +174,7 @@ fun DashboardScreen(
             editingTransaction?.let { tx ->
                 EditTransactionDialog(
                     transaction = tx,
+                    availableCategories = availableCategories,
                     onDismiss = { editingTransaction = null },
                     onSave = { updatedTransaction ->
                         viewModel.updateTransaction(updatedTransaction)
@@ -151,7 +195,10 @@ fun DashboardScreen(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(20.dp)
-                    .navigationBarsPadding()
+                    .navigationBarsPadding(),
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
                 Text(
                     text = "+",
