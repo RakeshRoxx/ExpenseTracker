@@ -157,10 +157,10 @@ fun EditTransactionDialog(
                             transaction.copy(
                                 merchant = merchantName.trim().ifBlank { transaction.merchant },
                                 amount = parsedAmount,
-                                category = if (transaction.type == "DEBIT") {
+                                category = if (transaction.type.trim().equals("DEBIT", ignoreCase = true)) {
                                     selectedCategory
                                 } else {
-                                    transaction.category
+                                    ""
                                 },
                                 sourceBank = bankName.trim().ifBlank { transaction.sourceBank }
                             )

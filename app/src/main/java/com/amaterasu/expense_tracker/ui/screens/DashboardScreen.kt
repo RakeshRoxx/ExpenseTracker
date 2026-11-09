@@ -34,10 +34,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.amaterasu.expense_tracker.data.entity.TransactionEntity
+import com.amaterasu.expense_tracker.ui.components.CategoryExpenseSummary
 import com.amaterasu.expense_tracker.ui.components.MonthlyPieHeader
 import com.amaterasu.expense_tracker.ui.components.SectionHeader
+import com.amaterasu.expense_tracker.ui.theme.categoryPaletteFor
 import com.amaterasu.expense_tracker.viewmodel.TransactionViewModel
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -53,11 +56,47 @@ fun DashboardScreen(
 ) {
     val transactions by viewModel.transactions.collectAsState()
     val expenseCategories by viewModel.expenseCategories.collectAsState()
-    val monthlyTotal by viewModel.monthlyTotal.collectAsState()
     val refreshing = viewModel.isRefreshing
     var showAddTransactionSheet by remember { mutableStateOf(false) }
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     var smsPreviewTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
+    val monthlyExpenseBreakdown = remember(transactions, expenseCategories) {
+        val zoneId = ZoneId.systemDefault()
+        val monthStart = LocalDate.now().withDayOfMonth(1)
+        val startMillis = monthStart.atStartOfDay(zoneId).toInstant().toEpochMilli()
+        val nextMonthMillis = monthStart.plusMonths(1)
+            .atStartOfDay(zoneId)
+            .toInstant()
+            .toEpochMilli()
+
+        transactions
+            .asSequence()
+            .filter { transaction ->
+                transaction.type.trim().equals("DEBIT", ignoreCase = true) &&
+                    transaction.smsReceivedTimestamp >= startMillis &&
+                    transaction.smsReceivedTimestamp < nextMonthMillis
+            }
+            .groupBy { transaction ->
+                transaction.category.trim().ifBlank { "OTHER" }.lowercase()
+            }
+            .values
+            .mapNotNull { categoryTransactions ->
+                val category = categoryTransactions.first().category.trim().ifBlank { "OTHER" }
+                val amount = categoryTransactions.sumOf { it.amount }
+                if (amount <= 0.0) return@mapNotNull null
+
+                val savedColorIndex = expenseCategories
+                    .firstOrNull { it.name.equals(category, ignoreCase = true) }
+                    ?.colorIndex
+                val palette = categoryPaletteFor(category, savedColorIndex)
+                CategoryExpenseSummary(
+                    category = category,
+                    amount = amount,
+                    color = palette.content
+                )
+            }
+            .sortedByDescending { it.amount }
+    }
     val groupedTransactions = remember(transactions) {
         transactions.groupBy { transaction ->
             Instant.ofEpochMilli(transaction.smsReceivedTimestamp)
@@ -107,7 +146,7 @@ fun DashboardScreen(
                 }
 
                 item {
-                    MonthlyPieHeader(total = monthlyTotal)
+                    MonthlyPieHeader(categoryExpenses = monthlyExpenseBreakdown)
                 }
 
                 if (refreshing) {

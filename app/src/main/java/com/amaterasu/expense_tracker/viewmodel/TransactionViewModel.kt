@@ -195,7 +195,11 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
                         merchant = merchant.trim(),
                         smsReceivedTimestamp = now,
                         parsingTimestamp = now,
-                        category = category.trim().ifBlank { "OTHER" },
+                        category = if (type.trim().equals("DEBIT", ignoreCase = true)) {
+                            category.trim().ifBlank { "OTHER" }
+                        } else {
+                            ""
+                        },
                         source = "MANUAL",
                         accountHint = null,
                         sourceBank = resolvedSourceBank,
