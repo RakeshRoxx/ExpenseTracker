@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import com.amaterasu.expense_tracker.data.entity.TransactionEntity
 import com.amaterasu.expense_tracker.ui.theme.IncomeGreen
 import com.amaterasu.expense_tracker.ui.theme.PastelCoral
+import com.amaterasu.expense_tracker.ui.theme.categoryPaletteFor
 import com.amaterasu.expense_tracker.ui.theme.SoftSky
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -66,6 +67,7 @@ fun TransactionRow(
     val amountColor = if (isDebit) PastelCoral else IncomeGreen
     val badgeColor = if (isDebit) Color(0xFFFFEFEC) else SoftSky
     val badgeContentColor = if (isDebit) PastelCoral else MaterialTheme.colorScheme.primary
+    val categoryPalette = categoryPaletteFor(tx.category)
     val merchantInitial = tx.merchant.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "•"
     val transactionDetails = "${tx.sourceBank} · ${Utils.formatTimeStamp(tx.smsReceivedTimestamp)}"
     var isVisible by remember(tx.id) { mutableStateOf(true) }
@@ -207,7 +209,7 @@ fun TransactionRow(
                             Spacer(modifier = Modifier.height(7.dp))
                             Surface(
                                 shape = RoundedCornerShape(50),
-                                color = badgeColor
+                                color = categoryPalette.container
                             ) {
                                 Text(
                                     text = tx.category
@@ -217,7 +219,7 @@ fun TransactionRow(
                                         .replaceFirstChar { it.titlecase() },
                                     modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = badgeContentColor
+                                    color = categoryPalette.content
                                 )
                             }
                         }

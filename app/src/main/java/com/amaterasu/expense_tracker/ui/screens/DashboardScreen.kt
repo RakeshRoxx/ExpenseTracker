@@ -52,17 +52,12 @@ fun DashboardScreen(
     viewModel: TransactionViewModel = viewModel()
 ) {
     val transactions by viewModel.transactions.collectAsState()
+    val expenseCategories by viewModel.expenseCategories.collectAsState()
     val monthlyTotal by viewModel.monthlyTotal.collectAsState()
     val refreshing = viewModel.isRefreshing
     var showAddTransactionSheet by remember { mutableStateOf(false) }
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     var smsPreviewTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
-    val availableCategories = remember(transactions) {
-        transactions
-            .map { it.category.trim() }
-            .filter { it.isNotBlank() }
-            .distinctBy { it.lowercase() }
-    }
     val groupedTransactions = remember(transactions) {
         transactions.groupBy { transaction ->
             Instant.ofEpochMilli(transaction.smsReceivedTimestamp)
@@ -174,7 +169,10 @@ fun DashboardScreen(
             editingTransaction?.let { tx ->
                 EditTransactionDialog(
                     transaction = tx,
-                    availableCategories = availableCategories,
+                    availableCategories = expenseCategories,
+                    onCategoryCreated = { name, colorIndex ->
+                        viewModel.addExpenseCategory(name, colorIndex)
+                    },
                     onDismiss = { editingTransaction = null },
                     onSave = { updatedTransaction ->
                         viewModel.updateTransaction(updatedTransaction)
@@ -209,12 +207,17 @@ fun DashboardScreen(
             if (showAddTransactionSheet) {
                 AddTransactionDialog(
                     onDismiss = { showAddTransactionSheet = false },
-                    onSave = { amount, type, merchant, sourceBank ->
+                    availableCategories = expenseCategories,
+                    onCategoryCreated = { name, colorIndex ->
+                        viewModel.addExpenseCategory(name, colorIndex)
+                    },
+                    onSave = { amount, type, merchant, sourceBank, category ->
                         viewModel.addManualTransaction(
                             amount = amount,
                             type = type,
                             merchant = merchant,
-                            sourceBank = sourceBank
+                            sourceBank = sourceBank,
+                            category = category
                         )
                         showAddTransactionSheet = false
                     }

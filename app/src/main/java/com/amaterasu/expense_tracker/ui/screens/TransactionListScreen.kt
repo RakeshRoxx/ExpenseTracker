@@ -20,12 +20,7 @@ fun TransactionListScreen(
     viewModel: TransactionViewModel = viewModel()
 ) {
     val transactions by viewModel.transactions.collectAsState()
-    val availableCategories = remember(transactions) {
-        transactions
-            .map { it.category.trim() }
-            .filter { it.isNotBlank() }
-            .distinctBy { it.lowercase() }
-    }
+    val expenseCategories by viewModel.expenseCategories.collectAsState()
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
     var smsPreviewTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
 
@@ -50,7 +45,10 @@ fun TransactionListScreen(
         editingTransaction?.let { tx ->
             EditTransactionDialog(
                 transaction = tx,
-                availableCategories = availableCategories,
+                availableCategories = expenseCategories,
+                onCategoryCreated = { name, colorIndex ->
+                    viewModel.addExpenseCategory(name, colorIndex)
+                },
                 onDismiss = { editingTransaction = null },
                 onSave = { updatedTransaction ->
                     viewModel.updateTransaction(updatedTransaction)

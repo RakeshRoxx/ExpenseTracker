@@ -9,7 +9,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.amaterasu.expense_tracker.BuildConfig
 import com.amaterasu.expense_tracker.data.database.RoomDatabaseProvider
+import com.amaterasu.expense_tracker.data.entity.CategoryEntity
 import com.amaterasu.expense_tracker.data.entity.TransactionEntity
+import com.amaterasu.expense_tracker.data.repository.CategoryRepository
 import com.amaterasu.expense_tracker.data.repository.TransactionRepository
 import com.amaterasu.expense_tracker.ml.TfidfClassifierProvider
 import com.amaterasu.expense_tracker.sms.SmsExporter
@@ -18,6 +20,7 @@ import com.amaterasu.expense_tracker.sms.SmsSyncStore
 import com.amaterasu.expense_tracker.usecase.ImportSmsTransactionsUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -31,6 +34,7 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
 
     private val db = RoomDatabaseProvider.get(app)
     private val repo = TransactionRepository(db.TransactionDao())
+    private val categoryRepository = CategoryRepository(db.CategoryDao())
 
     private val importUseCase =
         ImportSmsTransactionsUseCase(
@@ -45,6 +49,10 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
         repo.observeAll()
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    val expenseCategories: StateFlow<List<CategoryEntity>> =
+        categoryRepository.observeByType("EXPENSE")
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     private val _monthlyTotal = MutableStateFlow(0.0)
     val monthlyTotal: StateFlow<Double> = _monthlyTotal
 
@@ -55,6 +63,14 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         refreshMonthlyTotal()
+        viewModelScope.launch {
+            try {
+                val existingCategoryNames = repo.observeAll().first().map { it.category }
+                categoryRepository.ensureExpenseCategories(existingCategoryNames)
+            } catch (e: Exception) {
+                Log.e("TransactionViewModel", "Failed to seed expense categories", e)
+            }
+        }
 
         // 🔥 Warm up ML model in background (prevents first-run ANR)
         viewModelScope.launch(Dispatchers.IO) {
@@ -141,11 +157,26 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun addExpenseCategory(name: String, colorIndex: Int) {
+        viewModelScope.launch {
+            try {
+                categoryRepository.addCategory(
+                    name = name,
+                    type = "EXPENSE",
+                    colorIndex = colorIndex
+                )
+            } catch (e: Exception) {
+                Log.e("TransactionViewModel", "Failed to save category", e)
+            }
+        }
+    }
+
     fun addManualTransaction(
         amount: Double,
         type: String,
         merchant: String,
-        sourceBank: String
+        sourceBank: String,
+        category: String = "OTHER"
     ) {
         viewModelScope.launch {
             try {
@@ -164,7 +195,7 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
                         merchant = merchant.trim(),
                         smsReceivedTimestamp = now,
                         parsingTimestamp = now,
-                        category = "OTHER",
+                        category = category.trim().ifBlank { "OTHER" },
                         source = "MANUAL",
                         accountHint = null,
                         sourceBank = resolvedSourceBank,

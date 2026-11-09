@@ -28,17 +28,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.amaterasu.expense_tracker.data.entity.CategoryEntity
+import com.amaterasu.expense_tracker.ui.components.ExpenseCategoryPicker
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTransactionDialog(
     onDismiss: () -> Unit,
-    onSave: (amount: Double, type: String, merchant: String, sourceBank: String) -> Unit
+    onSave: (
+        amount: Double,
+        type: String,
+        merchant: String,
+        sourceBank: String,
+        category: String
+    ) -> Unit,
+    availableCategories: List<CategoryEntity> = emptyList(),
+    onCategoryCreated: (String, Int) -> Unit = { _, _ -> }
 ) {
     var amount by remember { mutableStateOf("") }
     var merchantName by remember { mutableStateOf("") }
     var bankName by remember { mutableStateOf("") }
     var transactionType by remember { mutableStateOf("DEBIT") }
+    var selectedCategory by remember { mutableStateOf("OTHER") }
     var amountError by remember { mutableStateOf<String?>(null) }
     var merchantError by remember { mutableStateOf<String?>(null) }
     val sheetState = rememberModalBottomSheetState(
@@ -116,6 +127,17 @@ fun AddTransactionDialog(
                 )
             }
 
+            if (transactionType == "DEBIT") {
+                Spacer(modifier = Modifier.height(12.dp))
+                ExpenseCategoryPicker(
+                    selectedCategory = selectedCategory,
+                    availableCategories = availableCategories,
+                    onCategorySelected = { selectedCategory = it },
+                    onCategoryAdded = { selectedCategory = it },
+                    onCategoryCreated = onCategoryCreated
+                )
+            }
+
             Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
@@ -179,7 +201,8 @@ fun AddTransactionDialog(
                             parsedAmount!!,
                             transactionType,
                             trimmedMerchant,
-                            trimmedBank
+                            trimmedBank,
+                            selectedCategory
                         )
                     }
                 ) {
