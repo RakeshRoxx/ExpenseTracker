@@ -56,6 +56,7 @@ fun DashboardScreen(
 ) {
     val transactions by viewModel.transactions.collectAsState()
     val expenseCategories by viewModel.expenseCategories.collectAsState()
+    val netMonthlyExpense by viewModel.monthlyTotal.collectAsState()
     val refreshing = viewModel.isRefreshing
     var showAddTransactionSheet by remember { mutableStateOf(false) }
     var editingTransaction by remember { mutableStateOf<TransactionEntity?>(null) }
@@ -73,6 +74,7 @@ fun DashboardScreen(
             .asSequence()
             .filter { transaction ->
                 transaction.type.trim().equals("DEBIT", ignoreCase = true) &&
+                    !transaction.category.trim().equals("TRANSFER", ignoreCase = true) &&
                     transaction.smsReceivedTimestamp >= startMillis &&
                     transaction.smsReceivedTimestamp < nextMonthMillis
             }
@@ -146,7 +148,10 @@ fun DashboardScreen(
                 }
 
                 item {
-                    MonthlyPieHeader(categoryExpenses = monthlyExpenseBreakdown)
+                    MonthlyPieHeader(
+                        categoryExpenses = monthlyExpenseBreakdown,
+                        netMonthlyExpense = netMonthlyExpense
+                    )
                 }
 
                 if (refreshing) {
@@ -191,8 +196,14 @@ fun DashboardScreen(
                             items(monthTransactions, key = { it.id }) { tx ->
                                 TransactionRow(
                                     tx = tx,
-                                    onClick = { smsPreviewTransaction = tx },
-                                    onLongPress = { editingTransaction = tx },
+                                    onClick = {
+                                        smsPreviewTransaction = null
+                                        editingTransaction = tx
+                                    },
+                                    onLongPress = {
+                                        editingTransaction = null
+                                        smsPreviewTransaction = tx
+                                    },
                                     onDelete = {
                                         if (editingTransaction?.id == tx.id) editingTransaction = null
                                         if (smsPreviewTransaction?.id == tx.id) smsPreviewTransaction = null

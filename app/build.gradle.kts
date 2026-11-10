@@ -72,6 +72,10 @@ android {
         compose = true
         buildConfig = true
     }
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -108,6 +112,9 @@ dependencies {
 
     // ---------- WorkManager ----------
     implementation(libs.androidx.work.runtime.ktx)
+
+    // ---------- LiteRT / TFLite ----------
+    implementation("org.tensorflow:tensorflow-lite:2.16.1")
 
     // ---------- Tests ----------
 //    testImplementation("junit:junit:4.13.2")

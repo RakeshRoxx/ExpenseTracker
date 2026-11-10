@@ -31,8 +31,14 @@ fun TransactionListScreen(
             items(transactions, key = { it.id }) { tx ->
                 TransactionRow(
                     tx = tx,
-                    onClick = { smsPreviewTransaction = tx },
-                    onLongPress = { editingTransaction = tx },
+                    onClick = {
+                        smsPreviewTransaction = null
+                        editingTransaction = tx
+                    },
+                    onLongPress = {
+                        editingTransaction = null
+                        smsPreviewTransaction = tx
+                    },
                     onDelete = {
                         if (editingTransaction?.id == tx.id) editingTransaction = null
                         if (smsPreviewTransaction?.id == tx.id) smsPreviewTransaction = null

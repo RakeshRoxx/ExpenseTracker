@@ -6,7 +6,7 @@ class SmsParserEngine(
     private val parsers: List<SmsParser>
 ) {
     fun parse(sms: String, timestamp: Long, sender: String): Transaction? {
-        val parser = parsers.firstOrNull { it.canHandle(sms) }
+        val parser = parsers.firstOrNull { it.canHandle(sms, sender) }
         return parser?.parse(sms, timestamp, sender)
     }
 }

@@ -1,7 +1,7 @@
 package com.amaterasu.expense_tracker.worker
 
 import android.content.Context
-import android.util.Log
+import com.amaterasu.expense_tracker.logging.AppLogger
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -15,7 +15,7 @@ object WorkScheduler {
 
     fun schedule(context: Context) {
         if (!backgroundSmsWorkerEnabled) {
-            Log.d("WORK_SCHEDULER", "Background SMS worker disabled by flag")
+            AppLogger.d("WORK_SCHEDULER", "Background SMS worker disabled by flag")
             return
         }
 
@@ -40,11 +40,11 @@ object WorkScheduler {
     // ✅ User-triggered run → allow Foreground Service
     fun runOnceFromUser(context: Context) {
         if (!backgroundSmsWorkerEnabled) {
-            Log.d("WORK_SCHEDULER", "Background SMS worker disabled by flag")
+            AppLogger.d("WORK_SCHEDULER", "Background SMS worker disabled by flag")
             return
         }
 
-        Log.d("WORKER_RUN_ONCE", "User triggered run")
+        AppLogger.d("WORKER_RUN_ONCE", "User triggered run")
 
         val request = OneTimeWorkRequestBuilder<SmsImportWorker>()
             .addTag("USER_TRIGGERED")   // 👈 key

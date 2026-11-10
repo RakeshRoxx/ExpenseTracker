@@ -34,7 +34,8 @@ data class CategoryExpenseSummary(
 
 @Composable
 fun MonthlyPieHeader(
-    categoryExpenses: List<CategoryExpenseSummary>
+    categoryExpenses: List<CategoryExpenseSummary>,
+    netMonthlyExpense: Double
 ) {
     val totalExpenses = categoryExpenses.sumOf { it.amount }
 
@@ -89,6 +90,15 @@ fun MonthlyPieHeader(
                         text = "Total expenses",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.White.copy(alpha = 0.86f)
+                    )
+
+                    Spacer(modifier = Modifier.height(7.dp))
+
+                    Text(
+                        text = "Net monthly expense: ₹ %.2f".format(netMonthlyExpense),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White
                     )
                 }
 

@@ -1,14 +1,14 @@
 package com.amaterasu.expense_tracker.ml
 
 import android.content.Context
-import android.util.Log
+import com.amaterasu.expense_tracker.logging.AppLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 object TfidfClassifierProvider {
 
     init {
-        Log.d("TfidfClassifierProvider", "Classifier initialized")
+        AppLogger.d("TfidfClassifierProvider", "Classifier initialized")
     }
 
 

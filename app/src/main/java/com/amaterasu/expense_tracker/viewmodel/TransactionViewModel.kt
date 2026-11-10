@@ -1,7 +1,7 @@
 package com.amaterasu.expense_tracker.viewmodel
 
 import android.app.Application
-import android.util.Log
+import com.amaterasu.expense_tracker.logging.AppLogger
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,7 +13,7 @@ import com.amaterasu.expense_tracker.data.entity.CategoryEntity
 import com.amaterasu.expense_tracker.data.entity.TransactionEntity
 import com.amaterasu.expense_tracker.data.repository.CategoryRepository
 import com.amaterasu.expense_tracker.data.repository.TransactionRepository
-import com.amaterasu.expense_tracker.ml.TfidfClassifierProvider
+import com.amaterasu.expense_tracker.ml.LiteRtTransactionClassifier
 import com.amaterasu.expense_tracker.sms.SmsExporter
 import com.amaterasu.expense_tracker.sms.SmsPermission
 import com.amaterasu.expense_tracker.sms.SmsSyncStore
@@ -68,17 +68,17 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
                 val existingCategoryNames = repo.observeAll().first().map { it.category }
                 categoryRepository.ensureExpenseCategories(existingCategoryNames)
             } catch (e: Exception) {
-                Log.e("TransactionViewModel", "Failed to seed expense categories", e)
+                AppLogger.e("TransactionViewModel", "Failed to seed expense categories", e)
             }
         }
 
         // 🔥 Warm up ML model in background (prevents first-run ANR)
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                TfidfClassifierProvider.get(getApplication())
-                Log.d("ML_INIT", "TF-IDF classifier loaded")
+                com.amaterasu.expense_tracker.ml.LiteRtTransactionClassifier(getApplication()).classify("warmup")
+                AppLogger.d("ML_INIT", "LiteRT classifier loaded")
             } catch (e: Exception) {
-                Log.e("ML_INIT", "Failed to init TF-IDF classifier", e)
+                AppLogger.e("ML_INIT", "Failed to init LiteRT classifier", e)
             }
         }
     }
@@ -99,7 +99,7 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
                 repo.saveAll(newTransactions)
                 refreshMonthlyTotal()
             } catch (e: Exception) {
-                Log.e("TransactionViewModel", "Launch test import failed", e)
+                AppLogger.e("TransactionViewModel", "Launch test import failed", e)
             } finally {
                 isRefreshing = false
             }
@@ -120,7 +120,11 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
                 .toEpochSecond() * 1000
 
             _monthlyTotal.value = repo.totalAmountByDate(start, end)
-            Log.d("TransactionViewModel", "Net Monthly Amount ${_monthlyTotal.value}")
+            AppLogger.d(
+                "MONTHLY_NET_EXPENSE",
+                "Net expense for ${now.month} ${now.year} " +
+                    "(debits minus credits, excluding transfers) = ₹${_monthlyTotal.value}"
+            )
         }
     }
 
@@ -139,7 +143,7 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
                 refreshMonthlyTotal()
 
             } catch (e: Exception) {
-                Log.e("TransactionViewModel", "Refresh failed", e)
+                AppLogger.e("TransactionViewModel", "Refresh failed", e)
             } finally {
                 isRefreshing = false
             }
@@ -152,7 +156,7 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
                 repo.updateTransaction(transaction)
                 refreshMonthlyTotal()
             } catch (e: Exception) {
-                Log.e("TransactionViewModel", "Update failed", e)
+                AppLogger.e("TransactionViewModel", "Update failed", e)
             }
         }
     }
@@ -166,7 +170,7 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
                     colorIndex = colorIndex
                 )
             } catch (e: Exception) {
-                Log.e("TransactionViewModel", "Failed to save category", e)
+                AppLogger.e("TransactionViewModel", "Failed to save category", e)
             }
         }
     }
@@ -208,7 +212,7 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
                 )
                 refreshMonthlyTotal()
             } catch (e: Exception) {
-                Log.e("TransactionViewModel", "Manual insert failed", e)
+                AppLogger.e("TransactionViewModel", "Manual insert failed", e)
             }
         }
     }
@@ -219,7 +223,7 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
                 repo.deleteTransaction(transaction)
                 refreshMonthlyTotal()
             } catch (e: Exception) {
-                Log.e("TransactionViewModel", "Delete failed", e)
+                AppLogger.e("TransactionViewModel", "Delete failed", e)
             }
         }
     }
@@ -242,10 +246,10 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
                 val file = withContext(Dispatchers.IO) {
                     SmsExporter.exportAllSmsToJsonl(getApplication())
                 }
-                Log.d("TransactionViewModel", "SMS exported to: ${file.absolutePath}")
+                AppLogger.d("TransactionViewModel", "SMS exported to: ${file.absolutePath}")
                 onDone(file.absolutePath)
             } catch (e: Exception) {
-                Log.e("TransactionViewModel", "SMS export failed", e)
+                AppLogger.e("TransactionViewModel", "SMS export failed", e)
                 onDone("FAILED")
             }
         }

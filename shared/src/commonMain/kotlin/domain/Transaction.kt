@@ -14,5 +14,13 @@ data class Transaction (
     val source: TransactionSource,
     val accountHint: String? = null,
     val sourceBank: String,
-    val rawSmsBody: String? = null
-)
+    val rawSmsBody: String? = null,
+    val purpose: MessagePurpose = MessagePurpose.PURCHASE
+) {
+    /**
+     * Only actual purchase debits count as expenses.
+     * Credit card bill settlements (CARD_PAYMENT), transfers, statements, and reminders are excluded.
+     */
+    val isExpense: Boolean
+        get() = type == TransactionType.DEBIT && purpose == MessagePurpose.PURCHASE
+}

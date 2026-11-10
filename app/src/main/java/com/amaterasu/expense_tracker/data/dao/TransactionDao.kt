@@ -31,8 +31,8 @@ interface TransactionDao {
 
     @Query("""SELECT IFNULL(SUM(
             CASE
-                WHEN type = 'DEBIT' THEN amount
-                WHEN type = 'CREDIT' THEN -amount
+                WHEN type = 'DEBIT' AND category != 'TRANSFER' THEN amount
+                WHEN type = 'CREDIT' AND category != 'TRANSFER' THEN -amount
                 ELSE 0
             END
         ), 0)

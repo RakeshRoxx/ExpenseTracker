@@ -57,6 +57,7 @@ datasets/
 exports/
 training_data/
 llm-training-details/output/
+llm-training-details
 
 # ===== Python (if you add training scripts later) =====
 __pycache__/

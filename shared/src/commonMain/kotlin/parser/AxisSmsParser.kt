@@ -1,52 +1,60 @@
 package parser
 
-import android.util.Log
 import domain.Category
+import domain.MessagePurpose
 import domain.Transaction
 import domain.TransactionSource
 import domain.TransactionType
-import utils.Utils
 
 class AxisSmsParser : BankSmsParser() {
 
-    override fun canHandle(sms: String): Boolean =
-        sms.contains("AXIS", ignoreCase = true)
+    override fun canHandle(sms: String): Boolean = canHandle(sms, "")
 
-    override fun parse(sms: String, timestamp: Long, sender: String): Transaction? {
-        Log.d("AXIS_SMS_PARSER", sms);
+    override fun canHandle(sms: String, sender: String): Boolean {
+        val senderUpper = sender.uppercase()
+        val smsUpper = sms.uppercase()
 
-//        val smsReceivedTimestamp = sms.get
-
-        val amount = extractAmount(sms);
-
-        if (amount == null) {
-            Log.d("AXIS_SMS_PARSER", "Failed to parse transaction amount");
-            return null;
+        if (senderUpper.isNotBlank()) {
+            return senderUpper.contains("AXIS")
         }
 
-        val txType = extractTransactionType(sms)
+        return (smsUpper.contains("AXIS BANK") || smsUpper.contains("AXISBK")) &&
+               (smsUpper.contains("A/C") || smsUpper.contains("CARD") ||
+                smsUpper.contains("DEBIT") || smsUpper.contains("CREDIT") ||
+                smsUpper.contains("SPENT") || smsUpper.contains("USED AT"))
+    }
+
+    override fun parse(sms: String, timestamp: Long, sender: String): Transaction? {
+        // Exclude non-transactional messages (statements, reminders, OTPs, marketing)
+        if (isNonTransactional(sms)) {
+            return null
+        }
+
+        val amount = extractAmount(sms) ?: return null
+        val txType = extractTransactionTypeOrNull(sms) ?: return null
+        val purpose = resolvePurpose(sms, txType)
+
         val merchant = MerchantLabelResolver.resolve(sms, txType).displayName
             ?: if (txType == TransactionType.DEBIT) "Bank Debit" else "Bank Credit"
 
-        val tx = Transaction(
+        val category = when (purpose) {
+            MessagePurpose.CARD_PAYMENT -> Category.TRANSFER
+            MessagePurpose.TRANSFER -> Category.TRANSFER
+            else -> Category.OTHER
+        }
+
+        return Transaction(
             id = "$timestamp-$amount",
             amount = amount,
             type = txType,
             merchant = merchant,
             smsReceivedTimestamp = timestamp,
-            parsingTimestamp = System.currentTimeMillis(),
-            category = Category.OTHER,
+            parsingTimestamp = timestamp,
+            category = category,
             source = TransactionSource.SMS,
             sourceBank = "AXIS",
-            rawSmsBody = sms
+            rawSmsBody = sms,
+            purpose = purpose
         )
-
-        val formatedDate = Utils.formatTimeStamp(timestamp);
-
-        Log.d("AXIS_PARSER", "SMS_DATE $formatedDate")
-        Log.d("AXIS_PARSER", "SMS_SENDER $sender")
-        Log.d("AXIS_PARSER", tx.toString());
-
-        return tx;
     }
 }

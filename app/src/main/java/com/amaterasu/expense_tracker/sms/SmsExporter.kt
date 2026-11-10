@@ -2,7 +2,8 @@ package com.amaterasu.expense_tracker.sms
 
 import android.content.Context
 import android.provider.Telephony
-import android.util.Log
+import com.amaterasu.expense_tracker.logging.AppLogger
+import classifier.RuleBasedSmsClassifier
 import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
@@ -10,8 +11,10 @@ import java.util.*
 
 object SmsExporter {
 
+    private val classifier = RuleBasedSmsClassifier()
+
     fun exportAllSmsToJsonl(context: Context): File {
-        Log.d("exportAllSmsToJsonl", "Exporter function called")
+        AppLogger.d("exportAllSmsToJsonl", "Exporter function called")
         val outputFile = File(
             context.getExternalFilesDir(null),
             "sms_dataset_${System.currentTimeMillis()}.jsonl"
@@ -49,7 +52,7 @@ object SmsExporter {
                         put("type", type)
                     }
 
-                    if(looksLikeTransaction(body, sender)) {
+                    if (looksLikeTransaction(body, sender)) {
                         writer.write(json.toString())
                         writer.newLine()
                     }
@@ -70,14 +73,8 @@ object SmsExporter {
     }
 
     private fun looksLikeTransaction(text: String, sender: String): Boolean {
-        Log.d("looksLikeTransaction", "Sender Name: $sender");
-        Log.d("looksLikeTransaction", "Sms Body: $text");
-
-        if (sender.contains("-S") || sender.contains("-T")) {
-            return true;
-        }
-
-        return listOf("debit", "debited", "credit", "credited", "spent", "₹", "rs.", "INR")
-            .any { text.contains(it, ignoreCase = true) };
+        if (sender.contains("EPFO", ignoreCase = true)) return false
+        val classification = classifier.classify(text, sender)
+        return classification.isFinancialTransaction
     }
 }

@@ -28,6 +28,8 @@ fun CategoryIcon(
             } else {
                 when (category.trim().uppercase().replace(' ', '_')) {
                     "FOOD" -> drawFoodIcon(tint)
+                    "GROCERY" -> drawGroceryIcon(tint)
+                    "PARTY" -> drawBeerGlassIcon(tint)
                     "TRAVEL" -> drawTravelIcon(tint)
                     "SHOPPING" -> drawShoppingIcon(tint)
                     "BILLS" -> drawBillsIcon(tint)
@@ -52,6 +54,34 @@ private fun DrawScope.drawFoodIcon(color: Color) {
     drawIconLine(color, 7f, 9f, 7f, 21f)
     drawCircle(color, radius = 2.5f, center = Offset(17f, 5.5f), style = Stroke(ICON_STROKE))
     drawIconLine(color, 17f, 8f, 17f, 21f)
+}
+
+private fun DrawScope.drawGroceryIcon(color: Color) {
+    val handle = Path().apply {
+        moveTo(8f, 8.5f)
+        cubicTo(8f, 2.5f, 16f, 2.5f, 16f, 8.5f)
+    }
+    drawPath(handle, color, style = Stroke(ICON_STROKE, cap = StrokeCap.Round))
+
+    drawIconPath(
+        color,
+        listOf(
+            Offset(5f, 8f),
+            Offset(19f, 8f),
+            Offset(18f, 21f),
+            Offset(6f, 21f),
+            Offset(5f, 8f)
+        )
+    )
+
+    drawCircle(color, radius = 1.8f, center = Offset(9f, 13f))
+    drawIconLine(color, 9f, 11.2f, 10f, 10.2f)
+
+    drawIconPath(
+        color,
+        listOf(Offset(13f, 11f), Offset(17f, 12f), Offset(14f, 17f), Offset(13f, 11f))
+    )
+    drawIconLine(color, 15f, 11.5f, 15.8f, 10f)
 }
 
 private fun DrawScope.drawTravelIcon(color: Color) {
@@ -119,6 +149,29 @@ private fun DrawScope.drawShoppingIcon(color: Color) {
     // Upward wing-tip flicks at the outer corners
     drawIconLine(color, 1.8f, 6.0f, 1.0f, 5.0f)
     drawIconLine(color, 22.2f, 6.0f, 23.0f, 5.0f)
+}
+
+private fun DrawScope.drawBeerGlassIcon(color: Color) {
+    val glass = Path().apply {
+        moveTo(5f, 7f)
+        lineTo(7f, 21f)
+        lineTo(16f, 21f)
+        lineTo(18f, 7f)
+    }
+    drawPath(glass, color, style = Stroke(ICON_STROKE, cap = StrokeCap.Round))
+    drawIconLine(color, 4f, 7f, 19f, 7f)
+
+    val handle = Path().apply {
+        moveTo(18f, 10f)
+        cubicTo(23f, 9f, 23f, 17f, 17.5f, 17f)
+    }
+    drawPath(handle, color, style = Stroke(ICON_STROKE, cap = StrokeCap.Round))
+
+    drawIconLine(color, 6.5f, 13f, 17f, 13f)
+
+    drawCircle(color, radius = 1.7f, center = Offset(8f, 5.5f), style = Stroke(ICON_STROKE))
+    drawCircle(color, radius = 2f, center = Offset(11.5f, 4.5f), style = Stroke(ICON_STROKE))
+    drawCircle(color, radius = 1.7f, center = Offset(15f, 5.5f), style = Stroke(ICON_STROKE))
 }
 
 private fun DrawScope.drawBillsIcon(color: Color) {

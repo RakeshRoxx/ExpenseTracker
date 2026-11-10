@@ -4,7 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
+import com.amaterasu.expense_tracker.logging.AppLogger
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -29,10 +29,10 @@ class MainActivity : ComponentActivity() {
                 if (WorkScheduler.backgroundSmsWorkerEnabled) {
                     maybeRequestNotificationPermission()
                 } else {
-                    Log.d("PERMISSION", "READ_SMS granted")
+                    AppLogger.d("PERMISSION", "READ_SMS granted")
                 }
             } else {
-                Log.w("PERMISSION", "READ_SMS denied")
+                AppLogger.w("PERMISSION", "READ_SMS denied")
             }
         }
 
@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
             if (granted) {
                 WorkScheduler.schedule(this)
             } else {
-                Log.w("PERMISSION", "FOREGROUND_SERVICE_DATA_SYNC denied")
+                AppLogger.w("PERMISSION", "FOREGROUND_SERVICE_DATA_SYNC denied")
                 // You can still run background work without FGS, just no foreground service
                 WorkScheduler.schedule(this)
             }

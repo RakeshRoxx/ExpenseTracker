@@ -1,6 +1,7 @@
 package parser
 
 import domain.Category
+import domain.MessagePurpose
 import domain.Transaction
 import domain.TransactionSource
 import domain.TransactionType
@@ -10,13 +11,28 @@ class DefaultSMSParser : BankSmsParser() {
         return true
     }
 
-    override fun parse(sms: String, timestamp: Long, sender: String): Transaction? {
-        val amount = extractAmount(sms) ?: return null
-        if (!isLikelyTransactionSms(sms)) return null
+    override fun canHandle(sms: String, sender: String): Boolean {
+        return true
+    }
 
-        val transactionType = extractTransactionType(sms)
+    override fun parse(sms: String, timestamp: Long, sender: String): Transaction? {
+        // Exclude non-transactional messages (statements, reminders, OTPs, marketing)
+        if (isNonTransactional(sms) || !isLikelyTransactionSms(sms)) {
+            return null
+        }
+
+        val amount = extractAmount(sms) ?: return null
+        val transactionType = extractTransactionTypeOrNull(sms) ?: return null
+        val purpose = resolvePurpose(sms, transactionType)
+
         val merchant = MerchantLabelResolver.resolve(sms, transactionType).displayName
             ?: if (transactionType == TransactionType.DEBIT) "Bank Debit" else "Bank Credit"
+
+        val category = when (purpose) {
+            MessagePurpose.CARD_PAYMENT -> Category.TRANSFER
+            MessagePurpose.TRANSFER -> Category.TRANSFER
+            else -> Category.OTHER
+        }
 
         return Transaction(
             id = "$timestamp-$amount-$sender",
@@ -25,11 +41,12 @@ class DefaultSMSParser : BankSmsParser() {
             merchant = merchant,
             smsReceivedTimestamp = timestamp,
             parsingTimestamp = System.currentTimeMillis(),
-            category = Category.OTHER,
+            category = category,
             source = TransactionSource.SMS,
             accountHint = extractAccountHint(sms),
             sourceBank = inferSourceBank(sender, sms),
-            rawSmsBody = sms
+            rawSmsBody = sms,
+            purpose = purpose
         )
     }
 

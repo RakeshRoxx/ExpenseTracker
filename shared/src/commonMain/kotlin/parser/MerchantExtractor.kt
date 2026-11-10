@@ -88,7 +88,8 @@ object MerchantExtractor {
     private fun extractPopularMerchant(text: String): String? {
         val normalizedText = text.lowercase()
         for ((needle, merchant) in popularMerchantAliases) {
-            if (needle in normalizedText) {
+            val pattern = Regex("""\b${Regex.escape(needle)}\b""", RegexOption.IGNORE_CASE)
+            if (pattern.containsMatchIn(normalizedText)) {
                 return merchant
             }
         }

@@ -31,6 +31,8 @@ import com.amaterasu.expense_tracker.ui.theme.categoryPaletteIndexFor
 
 private val suggestedExpenseCategories = listOf(
     "FOOD",
+    "GROCERY",
+    "PARTY",
     "TRAVEL",
     "SHOPPING",
     "BILLS",
