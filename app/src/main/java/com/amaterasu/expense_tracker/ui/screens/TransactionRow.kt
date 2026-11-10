@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.amaterasu.expense_tracker.data.entity.TransactionEntity
+import com.amaterasu.expense_tracker.ui.components.CategoryIcon
 import com.amaterasu.expense_tracker.ui.theme.IncomeGreen
 import com.amaterasu.expense_tracker.ui.theme.PastelCoral
 import com.amaterasu.expense_tracker.ui.theme.categoryPaletteFor
@@ -63,12 +64,13 @@ fun TransactionRow(
     onLongPress: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val isDebit = tx.type == "DEBIT"
+    val isDebit = tx.type.trim().equals("DEBIT", ignoreCase = true)
+    val isCredit = tx.type.trim().equals("CREDIT", ignoreCase = true)
     val amountColor = if (isDebit) PastelCoral else IncomeGreen
-    val badgeColor = if (isDebit) Color(0xFFFFEFEC) else SoftSky
-    val badgeContentColor = if (isDebit) PastelCoral else MaterialTheme.colorScheme.primary
-    val categoryPalette = categoryPaletteFor(tx.category)
-    val merchantInitial = tx.merchant.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "•"
+    val displayCategory = tx.category.trim().ifBlank { "OTHER" }
+    val categoryPalette = categoryPaletteFor(displayCategory)
+    val badgeColor = if (isDebit) categoryPalette.container else SoftSky
+    val badgeContentColor = if (isDebit) categoryPalette.content else MaterialTheme.colorScheme.primary
     val transactionDetails = "${tx.sourceBank} · ${Utils.formatTimeStamp(tx.smsReceivedTimestamp)}"
     var isVisible by remember(tx.id) { mutableStateOf(true) }
     var isDeleting by remember(tx.id) { mutableStateOf(false) }
@@ -180,11 +182,11 @@ fun TransactionRow(
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = merchantInitial,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = badgeContentColor
+                        CategoryIcon(
+                            category = displayCategory,
+                            isCredit = isCredit,
+                            tint = badgeContentColor,
+                            modifier = Modifier.size(23.dp)
                         )
                     }
 
@@ -205,22 +207,39 @@ fun TransactionRow(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1
                         )
-                        if (isDebit && tx.category.isNotBlank()) {
-                            Spacer(modifier = Modifier.height(7.dp))
-                            Surface(
-                                shape = RoundedCornerShape(50),
-                                color = categoryPalette.container
-                            ) {
-                                Text(
-                                    text = tx.category
-                                        .trim()
-                                        .lowercase()
-                                        .replace('_', ' ')
-                                        .replaceFirstChar { it.titlecase() },
-                                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = categoryPalette.content
-                                )
+                        when {
+                            isDebit && tx.category.isNotBlank() -> {
+                                Spacer(modifier = Modifier.height(7.dp))
+                                Surface(
+                                    shape = RoundedCornerShape(50),
+                                    color = categoryPalette.container
+                                ) {
+                                    Text(
+                                        text = tx.category
+                                            .trim()
+                                            .lowercase()
+                                            .replace('_', ' ')
+                                            .replaceFirstChar { it.titlecase() },
+                                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = categoryPalette.content
+                                    )
+                                }
+                            }
+
+                            tx.type.trim().equals("CREDIT", ignoreCase = true) -> {
+                                Spacer(modifier = Modifier.height(7.dp))
+                                Surface(
+                                    shape = RoundedCornerShape(50),
+                                    color = SoftSky
+                                ) {
+                                    Text(
+                                        text = "Credit",
+                                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
                             }
                         }
                     }

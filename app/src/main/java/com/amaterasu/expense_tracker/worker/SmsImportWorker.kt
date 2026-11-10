@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
-import android.util.Log
+import com.amaterasu.expense_tracker.logging.AppLogger
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -27,10 +27,10 @@ class SmsImportWorker (
 
     override suspend fun doWork(): Result {
 
-        Log.d("SMS_WORKER", "Worker Started")
+        AppLogger.d("SMS_WORKER", "Worker Started")
 
         if (!SmsPermission.hasPermission(applicationContext)) {
-            Log.d("SMS_WORKER", "SMS permission not granted can't process")
+            AppLogger.d("SMS_WORKER", "SMS permission not granted can't process")
             return Result.success()
         }
 
@@ -47,12 +47,12 @@ class SmsImportWorker (
             val repository = TransactionRepository(db.TransactionDao())
 
             val transactions = importUseCase.execute()
-            Log.d("SMS_WORKER", "Parsed ${transactions.size} transactions")
+            AppLogger.d("SMS_WORKER", "Parsed ${transactions.size} transactions")
 
             repository.saveAll(transactions)
             Result.success()
         } catch (e: Exception) {
-            Log.e("SMS_WORKER", "Worker failed", e)
+            AppLogger.e("SMS_WORKER", "Worker failed", e)
             Result.retry()
         }
     }
@@ -61,7 +61,7 @@ class SmsImportWorker (
     private fun showNotification(text: String) {
 
         if (!canPostNotifications()) {
-            Log.d("SMS_WORKER", "Notification permission not granted, Skipping Notification");
+            AppLogger.d("SMS_WORKER", "Notification permission not granted, Skipping Notification");
             return;
         }
 

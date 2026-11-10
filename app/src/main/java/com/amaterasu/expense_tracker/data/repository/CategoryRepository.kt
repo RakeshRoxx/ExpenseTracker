@@ -8,6 +8,8 @@ private const val EXPENSE_CATEGORY_TYPE = "EXPENSE"
 
 private val defaultExpenseCategories = listOf(
     "FOOD" to 0,
+    "GROCERY" to 9,
+    "PARTY" to 10,
     "TRAVEL" to 1,
     "SHOPPING" to 2,
     "BILLS" to 3,

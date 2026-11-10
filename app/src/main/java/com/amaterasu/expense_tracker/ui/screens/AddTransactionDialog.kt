@@ -202,7 +202,7 @@ fun AddTransactionDialog(
                             transactionType,
                             trimmedMerchant,
                             trimmedBank,
-                            selectedCategory
+                            if (transactionType == "DEBIT") selectedCategory else ""
                         )
                     }
                 ) {

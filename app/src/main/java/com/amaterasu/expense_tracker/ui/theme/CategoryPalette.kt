@@ -17,11 +17,15 @@ private val categoryPalettes = listOf(
     CategoryPalette(5, Color(0xFFE4F6F3), Color(0xFF27736C)),
     CategoryPalette(6, Color(0xFFFFF6DB), Color(0xFF866500)),
     CategoryPalette(7, Color(0xFFEFF1F5), Color(0xFF5E6470)),
-    CategoryPalette(8, Color(0xFFE7F5F7), Color(0xFF28717C))
+    CategoryPalette(8, Color(0xFFE7F5F7), Color(0xFF28717C)),
+    CategoryPalette(9, Color(0xFFF1F5D7), Color(0xFF63752A)),
+    CategoryPalette(10, Color(0xFFE5F4F6), Color(0xFF23636B))
 )
 
 private val builtInCategoryPaletteIndices = mapOf(
     "FOOD" to 0,
+    "GROCERY" to 9,
+    "PARTY" to 10,
     "TRAVEL" to 1,
     "SHOPPING" to 2,
     "BILLS" to 3,

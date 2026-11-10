@@ -1,7 +1,7 @@
 package com.amaterasu.expense_tracker.viewmodel
 
 import android.app.Application
-import android.util.Log
+import com.amaterasu.expense_tracker.logging.AppLogger
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.amaterasu.expense_tracker.data.database.RoomDatabaseProvider
@@ -20,21 +20,21 @@ class MainViewModel (app: Application) : AndroidViewModel(app) {
 
     fun importSmsTransaction() {
         viewModelScope.launch (Dispatchers.IO) {
-            Log.d("SMS_FLOW", "Import started");
+            AppLogger.d("SMS_FLOW", "Import started");
 
             val transactions = importUseCase.execute();
 
-            Log.d("SMS_FLOW_TRANSACTION_COUNT", "Parsed ${transactions.size} transactions")
+            AppLogger.d("SMS_FLOW_TRANSACTION_COUNT", "Parsed ${transactions.size} transactions")
 
             repository.saveAll(transactions);
 
-            Log.d("SAVE_TO_DB", "Saved to DB");
+            AppLogger.d("SAVE_TO_DB", "Saved to DB");
 
             val count = db.TransactionDao().count();
-            Log.d("ROOM_DB", "Transaction count = $count")
+            AppLogger.d("ROOM_DB", "Transaction count = $count")
 
 //            transactions.forEach {
-//                Log.d("SMS_FLOW_TRANSACTION", it.toString());
+//                AppLogger.d("SMS_FLOW_TRANSACTION", it.toString());
 //            }
         }
     }
