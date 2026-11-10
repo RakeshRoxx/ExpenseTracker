@@ -12,8 +12,8 @@ val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties().takeIf { keystorePropertiesFile.exists() }?.apply {
     load(FileInputStream(keystorePropertiesFile))
 }
-val appVersionCode = 2
-val appVersionName = "1.0.1"
+val appVersionCode = 3
+val appVersionName = "1.5.0"
 
 android {
     namespace = "com.amaterasu.expense_tracker"
@@ -132,12 +132,12 @@ ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
 
-val releaseApkFileName = "RupeeRadar-v${appVersionName}-${appVersionCode}-release.apk"
+val releaseApkFileName = "Rupeeense-v${appVersionName}-${appVersionCode}-release.apk"
 
 tasks.register<Copy>("renameReleaseApk") {
     dependsOn("assembleRelease")
 
-    from(layout.buildDirectory.dir("intermediates/apk/release")) {
+    from(layout.buildDirectory.dir("outputs/apk/release")) {
         include("*.apk")
     }
 
