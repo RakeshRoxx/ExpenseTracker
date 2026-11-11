@@ -20,11 +20,13 @@ class SmsProcessor {
 
     fun parseOne(raw: RawSms): Transaction? {
         return engine.parse(raw.body, raw.timestamp, raw.sender)
+            ?.copy(smsId = raw.id)
     }
 
     fun process(smsList: List<RawSms>): List<Transaction> {
-        return smsList.mapNotNull {
-            engine.parse(it.body, it.timestamp, it.sender)
+        return smsList.mapNotNull { raw ->
+            engine.parse(raw.body, raw.timestamp, raw.sender)
+                ?.copy(smsId = raw.id)
         }
     }
 }

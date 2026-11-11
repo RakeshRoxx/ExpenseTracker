@@ -14,22 +14,41 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.amaterasu.expense_tracker.data.entity.TransactionEntity
+import com.amaterasu.expense_tracker.sms.SmsBodyLookupResult
 import utils.Utils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionSmsDialog(
     transaction: TransactionEntity,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    loadOriginalSms: suspend (Long?) -> SmsBodyLookupResult
 ) {
-    val smsBody = transaction.rawSmsBody?.trim().orEmpty()
+    var lookupResult by remember(transaction.id) {
+        mutableStateOf<SmsBodyLookupResult>(SmsBodyLookupResult.Loading)
+    }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-    ) {
+    LaunchedEffect(transaction.id, transaction.smsId) {
+        lookupResult = loadOriginalSms(transaction.smsId)
+    }
+
+    val smsText = when (val result = lookupResult) {
+        SmsBodyLookupResult.Loading -> "Loading original text…"
+        is SmsBodyLookupResult.Found -> result.body
+        SmsBodyLookupResult.NotFound -> "No original text found."
+        SmsBodyLookupResult.PermissionDenied ->
+            "SMS permission is unavailable, so the original text cannot be opened."
+    }
+
+    ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -54,11 +73,7 @@ fun TransactionSmsDialog(
 
             SelectionContainer {
                 Text(
-                    text = if (smsBody.isBlank()) {
-                        "Original SMS is not available for this transaction yet. Newly imported transactions will include it."
-                    } else {
-                        smsBody
-                    },
+                    text = smsText,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier

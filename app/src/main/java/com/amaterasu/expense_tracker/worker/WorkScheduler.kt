@@ -15,7 +15,10 @@ object WorkScheduler {
 
     fun schedule(context: Context) {
         if (!backgroundSmsWorkerEnabled) {
-            AppLogger.d("WORK_SCHEDULER", "Background SMS worker disabled by flag")
+            val workManager = WorkManager.getInstance(context)
+            workManager.cancelUniqueWork(WORK_NAME)
+            workManager.cancelAllWorkByTag("USER_TRIGGERED")
+            AppLogger.d("WORK_SCHEDULER", "Background SMS worker disabled; stale SMS work cancelled")
             return
         }
 

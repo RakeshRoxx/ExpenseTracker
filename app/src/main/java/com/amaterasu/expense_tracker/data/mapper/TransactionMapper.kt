@@ -14,5 +14,5 @@ fun Transaction.toEntity(): TransactionEntity = TransactionEntity(
     source = source.name,
     accountHint = accountHint,
     sourceBank = sourceBank,
-    rawSmsBody = rawSmsBody
+    smsId = smsId
 )

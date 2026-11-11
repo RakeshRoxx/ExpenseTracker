@@ -1,85 +1,46 @@
-# Rupee Radar Privacy Policy
+# Rupeeense Privacy Policy
 
-Last updated: April 11, 2026
+Last updated: November 11, 2026
 
-Rupee Radar is an Android app that helps users identify and track transaction-related SMS messages on their device. This Privacy Policy explains what the app accesses, how data is handled, and what choices users have.
+Rupeeense is an Android app for tracking personal expenses. This policy explains how the app handles SMS and transaction data.
 
-## Summary
+## SMS access and consent
 
-- Rupee Radar reads SMS messages only after the user grants the `READ_SMS` permission.
-- SMS parsing and transaction classification are performed on-device.
-- The app does not request the `INTERNET` permission and does not send SMS content to a server.
-- Transaction data is stored locally on the device using the app's local database.
-- The app may show local notifications related to background SMS import.
-- The app includes an export feature that can write a masked SMS dataset file to app-specific external storage when the user triggers that action.
+Rupeeense asks for your consent in the app before showing Android's SMS permission prompt. If you do not agree or deny the Android permission, SMS import stays off. You can still add transactions manually.
 
-## Information the App Accesses
+When you enable SMS import, Rupeeense reads SMS inbox messages on this device to identify bank, card, and UPI transaction alerts. It uses the sender, message date, and message text for on-device classification and transaction parsing. Messages that are not identified as financial transactions are not saved to Rupeeense's transaction database.
 
-Rupee Radar may access:
+## Data stored on this device
 
-- SMS message body
-- SMS sender/address
-- SMS timestamp
-- User-created or edited transaction records
+For imported transactions, Rupeeense stores transaction details such as amount, merchant, transaction type, category, source, bank, and date, as well as the Android SMS message ID. It does not store the SMS message text in its transaction database.
 
-This access is used to detect likely financial transactions, display them in the app, and let the user review or manage their records.
+When you long-press a transaction, Rupeeense uses the saved message ID to ask Android's SMS provider for the original message. If the message has been deleted or is otherwise unavailable, the app shows “No original text found.”
 
-## How Data Is Used
+Manually added or edited transaction details and user-created categories are also stored in the app's local database. You can delete individual transactions in the app. Clearing Rupeeense's app storage or uninstalling it removes its local app data.
 
-The app uses the accessed data to:
+## On-device processing and sharing
 
-- detect transaction-related SMS messages
-- extract transaction details such as amount, merchant, bank, or type
-- save transaction records locally on the device
-- show transaction history and summaries
-- schedule background imports and notifications, if enabled by the app
+SMS classification and transaction parsing run on the device. Rupeeense does not request Internet access and does not upload SMS content or transaction records to a Rupeeense server. The app no longer includes an SMS dataset export feature.
 
-## Data Storage
-
-- Transaction records are stored locally on the device in the app database.
-- The app may remember the last processed SMS timestamp locally so it can avoid reprocessing the same messages.
-- If the user uses the export feature, a masked dataset file may be created inside the app's external files directory on the device.
-
-## Data Sharing
-
-Rupee Radar does not sell personal data.
-
-Based on the current app build, Rupee Radar does not send SMS content or transaction records to a remote server because the app does not request network access.
-
-Data may still be accessible to:
-
-- the user on their own device
-- Android system backup/restore features, if enabled on the device
-- third-party apps only if the user manually shares exported files outside the app
-
-## Exported Files
-
-If the user runs the export feature, the app creates a JSONL file containing masked SMS data for review or training-related workflows. The export process attempts to anonymize phone numbers, account references, UPI-like identifiers, and other long numeric values before writing the file.
-
-Users are responsible for handling exported files carefully after export.
+Android device backup and restore settings may back up app data. Those settings are controlled by Android and your Google account.
 
 ## Permissions
 
-Rupee Radar may request:
-
-- `READ_SMS` to read transaction-related SMS messages
-- `POST_NOTIFICATIONS` to show notification updates related to background work
-- foreground service permissions required by Android for background import behavior
-
-If SMS permission is denied, some core app functionality will not work.
+- `READ_SMS` is used only for the optional SMS transaction import feature described above.
+- If SMS access is declined, manual transaction entry remains available.
 
 ## Children
 
-Rupee Radar is not directed to children under 13.
+Rupeeense is not directed to children under 13.
 
 ## Security
 
-The app relies on Android's app sandbox and stores data locally. No app can guarantee absolute security, so users should keep their device protected and avoid sharing exported files unnecessarily.
+Rupeeense stores transaction records in the app's private local database and relies on Android's app sandbox. No app can guarantee absolute security. Protect your device and account, and avoid sharing screenshots that reveal financial details.
 
-## Changes to This Policy
+## Changes to this policy
 
-This Privacy Policy may be updated when app behavior changes. The "Last updated" date will be revised when material changes are made.
+This policy will be updated when the app's data practices change.
 
 ## Contact
 
-If you publish Rupee Radar publicly, replace this section with a real support email or website before release.
+For privacy or support questions, use the [Rupeeense project issue page](https://github.com/RakeshRoxx/ExpenseTracker/issues). Please do not include SMS text, bank details, or other private information in a public issue.

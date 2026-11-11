@@ -53,7 +53,7 @@ class AxisSmsParser : BankSmsParser() {
             category = category,
             source = TransactionSource.SMS,
             sourceBank = "AXIS",
-            rawSmsBody = sms,
+            
             purpose = purpose
         )
     }

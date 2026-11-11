@@ -14,7 +14,7 @@ data class Transaction (
     val source: TransactionSource,
     val accountHint: String? = null,
     val sourceBank: String,
-    val rawSmsBody: String? = null,
+    val smsId: Long? = null,
     val purpose: MessagePurpose = MessagePurpose.PURCHASE
 ) {
     /**

@@ -17,5 +17,5 @@ data class TransactionEntity (
     val source: String,
     val accountHint: String?,
     val sourceBank: String,
-    val rawSmsBody: String? = null
+    val smsId: Long? = null
 )

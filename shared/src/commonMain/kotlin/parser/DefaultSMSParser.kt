@@ -45,7 +45,7 @@ class DefaultSMSParser : BankSmsParser() {
             source = TransactionSource.SMS,
             accountHint = extractAccountHint(sms),
             sourceBank = inferSourceBank(sender, sms),
-            rawSmsBody = sms,
+            
             purpose = purpose
         )
     }

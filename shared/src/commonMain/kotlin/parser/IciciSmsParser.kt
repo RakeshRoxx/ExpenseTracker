@@ -53,7 +53,7 @@ class IciciSmsParser : BankSmsParser() {
             category = category,
             source = TransactionSource.SMS,
             sourceBank = "ICICI",
-            rawSmsBody = sms,
+            
             purpose = purpose
         )
     }

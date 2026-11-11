@@ -66,7 +66,8 @@ fun TransactionListScreen(
         smsPreviewTransaction?.let { tx ->
             TransactionSmsDialog(
                 transaction = tx,
-                onDismiss = { smsPreviewTransaction = null }
+                onDismiss = { smsPreviewTransaction = null },
+                loadOriginalSms = viewModel::loadOriginalSmsBody
             )
         }
     }

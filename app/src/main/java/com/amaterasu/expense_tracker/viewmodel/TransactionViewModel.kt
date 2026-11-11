@@ -14,7 +14,8 @@ import com.amaterasu.expense_tracker.data.entity.TransactionEntity
 import com.amaterasu.expense_tracker.data.repository.CategoryRepository
 import com.amaterasu.expense_tracker.data.repository.TransactionRepository
 import com.amaterasu.expense_tracker.ml.LiteRtTransactionClassifier
-import com.amaterasu.expense_tracker.sms.SmsExporter
+import com.amaterasu.expense_tracker.sms.SmsBodyLookupResult
+import com.amaterasu.expense_tracker.sms.SmsReader
 import com.amaterasu.expense_tracker.sms.SmsPermission
 import com.amaterasu.expense_tracker.sms.SmsSyncStore
 import com.amaterasu.expense_tracker.usecase.ImportSmsTransactionsUseCase
@@ -25,7 +26,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.security.MessageDigest
 import java.time.LocalDate
 import java.time.ZoneId
@@ -35,6 +35,8 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
     private val db = RoomDatabaseProvider.get(app)
     private val repo = TransactionRepository(db.TransactionDao())
     private val categoryRepository = CategoryRepository(db.CategoryDao())
+
+    private val smsReader = SmsReader(app)
 
     private val importUseCase =
         ImportSmsTransactionsUseCase(
@@ -207,7 +209,7 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
                         source = "MANUAL",
                         accountHint = null,
                         sourceBank = resolvedSourceBank,
-                        rawSmsBody = null
+                        smsId = null
                     )
                 )
                 refreshMonthlyTotal()
@@ -240,18 +242,6 @@ class TransactionViewModel(app: Application) : AndroidViewModel(app) {
             .joinToString("") { "%02x".format(it) }
     }
 
-    fun exportSmsForTraining(onDone: (String) -> Unit) {
-        viewModelScope.launch {
-            try {
-                val file = withContext(Dispatchers.IO) {
-                    SmsExporter.exportAllSmsToJsonl(getApplication())
-                }
-                AppLogger.d("TransactionViewModel", "SMS exported to: ${file.absolutePath}")
-                onDone(file.absolutePath)
-            } catch (e: Exception) {
-                AppLogger.e("TransactionViewModel", "SMS export failed", e)
-                onDone("FAILED")
-            }
-        }
-    }
+    suspend fun loadOriginalSmsBody(smsId: Long?): SmsBodyLookupResult =
+        smsReader.readSmsBodyById(smsId)
 }

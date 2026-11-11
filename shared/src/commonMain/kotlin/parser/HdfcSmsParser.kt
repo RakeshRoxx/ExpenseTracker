@@ -53,7 +53,7 @@ class HdfcSmsParser : BankSmsParser() {
             category = category,
             source = TransactionSource.SMS,
             sourceBank = "HDFC",
-            rawSmsBody = sms,
+            
             purpose = purpose
         )
     }
