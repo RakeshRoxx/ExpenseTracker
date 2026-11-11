@@ -89,6 +89,60 @@ abstract class BankSmsParser : SmsParser {
             }
         }
 
+        // Step 4: Action-verb contextual match WITHOUT currency symbol
+        // (e.g. "debited by 6000.00", "credited with 1500.00", "debited by 500")
+        val noCurrencyActionRegex = Regex(
+            """(?:debited\s+(?:by|with|for)|credited\s+(?:with|by|for)|refunded?\s+(?:of)?)\s*([0-9,]+(?:\.[0-9]{1,2})?)\b""",
+            RegexOption.IGNORE_CASE
+        )
+        noCurrencyActionRegex.find(text)?.let { match ->
+            val startIdx = match.range.first
+            val prefixSlice = text.substring(0.coerceAtLeast(startIdx - 35), startIdx).lowercase()
+            val isExcluded = exclusionPrefixes.any { prefixSlice.contains(it) }
+            if (!isExcluded) {
+                val value = match.groupValues.getOrNull(1)?.replace(",", "")?.toDoubleOrNull()
+                if (value != null && value > 0.0) {
+                    return value
+                }
+            }
+        }
+
+        // Step 5: Action-verb followed by decimal amount without currency
+        // (e.g. "paid 600.00", "spent 120.50", "debited 5000.00")
+        val noCurrencyDecimalRegex = Regex(
+            """(?:debited|credited|spent|withdrawn|paid|received)\s+([0-9,]+\.[0-9]{2})\b""",
+            RegexOption.IGNORE_CASE
+        )
+        noCurrencyDecimalRegex.find(text)?.let { match ->
+            val startIdx = match.range.first
+            val prefixSlice = text.substring(0.coerceAtLeast(startIdx - 35), startIdx).lowercase()
+            val isExcluded = exclusionPrefixes.any { prefixSlice.contains(it) }
+            if (!isExcluded) {
+                val value = match.groupValues.getOrNull(1)?.replace(",", "")?.toDoubleOrNull()
+                if (value != null && value > 0.0) {
+                    return value
+                }
+            }
+        }
+
+        // Step 6: Decimal amount preceding action verb without currency
+        // (e.g. "6000.00 debited")
+        val prefixDecimalRegex = Regex(
+            """\b([0-9,]+\.[0-9]{2})\s+(?:debited|credited|spent|withdrawn|paid|received)\b""",
+            RegexOption.IGNORE_CASE
+        )
+        prefixDecimalRegex.find(text)?.let { match ->
+            val startIdx = match.range.first
+            val prefixSlice = text.substring(0.coerceAtLeast(startIdx - 35), startIdx).lowercase()
+            val isExcluded = exclusionPrefixes.any { prefixSlice.contains(it) }
+            if (!isExcluded) {
+                val value = match.groupValues.getOrNull(1)?.replace(",", "")?.toDoubleOrNull()
+                if (value != null && value > 0.0) {
+                    return value
+                }
+            }
+        }
+
         // Fallback: first amount
         return allAmountsRegex.find(text)
             ?.groupValues?.getOrNull(1)

@@ -95,7 +95,8 @@ class DefaultSMSParser : BankSmsParser() {
             "\\bupi(?:/p2[am])?\\b",
             "\\bused\\s+at\\b",
             "\\btxn\\s+id\\b",
-            "\\bsalary\\b.*\\bcredited\\b"
+            "\\bsalary\\b.*\\bcredited\\b",
+            "\\btrf\\b"
         )
 
         return positivePatterns.any { Regex(it).containsMatchIn(normalized) }

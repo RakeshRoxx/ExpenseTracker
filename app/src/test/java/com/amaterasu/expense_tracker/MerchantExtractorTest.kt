@@ -79,4 +79,13 @@ class MerchantExtractorTest {
 
         assertNull(merchant)
     }
+
+    @Test
+    fun extractsMerchantFromUpiTrfToSms() {
+        val sms = "Dear UPI user A/C X3458 debited by 6000.00 on date 04Nov26 trf to Jaydeb Sarkar Refno 630894723920 If not u? call-1800111109 for other services-18001234-SBI"
+
+        val merchant = MerchantExtractor.extract(sms, TransactionType.DEBIT)
+
+        assertEquals("Jaydeb Sarkar", merchant)
+    }
 }

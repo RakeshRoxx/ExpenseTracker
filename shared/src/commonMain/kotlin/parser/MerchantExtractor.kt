@@ -6,8 +6,10 @@ object MerchantExtractor {
 
     private val stopPhrases = listOf(
         " not you",
+        " not u",
         " sms ",
         " call ",
+        " call-",
         " avl ",
         " avail ",
         " available ",
@@ -15,6 +17,8 @@ object MerchantExtractor {
         " balance:",
         " ref:",
         " ref no",
+        " refno",
+        " ref.",
         " upi ref",
         " utr",
         " on ",
@@ -64,7 +68,7 @@ object MerchantExtractor {
     )
 
     private val contextualPatterns = listOf(
-        Regex("""\b(?:paid|sent)\s+(?:to|for)\s+([A-Za-z0-9&._'()\/ -]{2,})""", RegexOption.IGNORE_CASE),
+        Regex("""\b(?:paid|sent|trf|transfer(?:red)?)\s+(?:to|for)\s+([A-Za-z0-9&._'()\/ -]{2,})""", RegexOption.IGNORE_CASE),
         Regex("""\b(?:received|credited)\s+(?:from|by)\s+([A-Za-z0-9&._'()\/ -]{2,})""", RegexOption.IGNORE_CASE),
         Regex("""\bused\s+at\s+([A-Za-z0-9&._'()\/ -]{2,})""", RegexOption.IGNORE_CASE),
         Regex("""\bspent(?:\s+inr\s+[0-9,]+(?:\.[0-9]{1,2})?)?\s+[A-Za-z0-9 ]*?at\s+([A-Za-z0-9&._'()\/ -]{2,})""", RegexOption.IGNORE_CASE),
@@ -148,7 +152,7 @@ object MerchantExtractor {
     }
 
     private val cleanupPatterns = listOf(
-        Regex("""\s*\(?(?:UPI\s+Ref|Ref(?:\s+No)?|UTR|Txn\s+Id|Transaction\s+Id)\b.*$""", RegexOption.IGNORE_CASE),
+        Regex("""\s*\(?(?:UPI\s+Ref|Ref(?:\s+No|\.no|no)?|UTR|Txn\s+Id|Transaction\s+Id)\b.*$""", RegexOption.IGNORE_CASE),
         Regex("""\s+\bfor\s+(?:INR|Rs[.]?|₹)\s+[\d,]+(?:\.\d{1,2})?.*$""", RegexOption.IGNORE_CASE)
     )
 

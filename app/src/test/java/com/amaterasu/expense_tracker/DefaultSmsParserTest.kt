@@ -102,4 +102,19 @@ class DefaultSmsParserTest {
         assertEquals(TransactionType.DEBIT, result?.type)
         assertEquals("Card Spend", result?.merchant)
     }
+
+    @Test
+    fun parsesSbiUpiDebitWithoutCurrencySymbol() {
+        val sms = "Dear UPI user A/C X3458 debited by 6000.00 on date 04Nov26 trf to Jaydeb Sarkar Refno 630894723920 If not u? call-1800111109 for other services-18001234-SBI"
+
+        val result = parser.parse(sms, 1710000000000, "SBIUPI")
+
+        assertNotNull(result)
+        assertEquals(6000.0, result?.amount ?: 0.0, 0.001)
+        assertEquals(TransactionType.DEBIT, result?.type)
+        assertEquals("Jaydeb Sarkar", result?.merchant)
+        assertEquals("SBI", result?.sourceBank)
+        assertEquals("X3458", result?.accountHint)
+        assertEquals(true, result?.isExpense)
+    }
 }
