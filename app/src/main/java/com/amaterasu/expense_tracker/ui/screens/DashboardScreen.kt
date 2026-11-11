@@ -264,11 +264,6 @@ fun DashboardScreen(
                                     onLongPress = {
                                         editingTransaction = null
                                         smsPreviewTransaction = tx
-                                    },
-                                    onDelete = {
-                                        if (editingTransaction?.id == tx.id) editingTransaction = null
-                                        if (smsPreviewTransaction?.id == tx.id) smsPreviewTransaction = null
-                                        viewModel.deleteTransaction(tx)
                                     }
                                 )
                             }
@@ -287,6 +282,10 @@ fun DashboardScreen(
                     onDismiss = { editingTransaction = null },
                     onSave = { updatedTransaction ->
                         viewModel.updateTransaction(updatedTransaction)
+                        editingTransaction = null
+                    },
+                    onDelete = {
+                        viewModel.deleteTransaction(tx)
                         editingTransaction = null
                     }
                 )

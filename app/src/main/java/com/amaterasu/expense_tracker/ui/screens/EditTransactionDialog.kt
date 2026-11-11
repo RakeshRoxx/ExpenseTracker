@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -26,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.amaterasu.expense_tracker.data.entity.CategoryEntity
@@ -38,6 +41,7 @@ fun EditTransactionDialog(
     transaction: TransactionEntity,
     onDismiss: () -> Unit,
     onSave: (TransactionEntity) -> Unit,
+    onDelete: () -> Unit = {},
     availableCategories: List<CategoryEntity> = emptyList(),
     onCategoryCreated: (String, Int) -> Unit = { _, _ -> }
 ) {
@@ -48,12 +52,15 @@ fun EditTransactionDialog(
     var selectedCategory by remember(transaction.id) {
         mutableStateOf(transaction.category.ifBlank { "OTHER" })
     }
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+
     LaunchedEffect(transaction.id) {
         bankName = transaction.sourceBank
         merchantName = transaction.merchant
         amount = transaction.amount.toString()
         amountError = null
         selectedCategory = transaction.category.ifBlank { "OTHER" }
+        showDeleteConfirmation = false
     }
 
     val sheetState = rememberModalBottomSheetState(
@@ -139,39 +146,79 @@ fun EditTransactionDialog(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = onDismiss) {
-                    Text("Cancel")
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(
-                    onClick = {
-                        val parsedAmount = amount.toDoubleOrNull()
-                        if (parsedAmount == null || parsedAmount <= 0.0) {
-                            amountError = "Enter a valid amount"
-                            return@Button
-                        }
-
-                        onSave(
-                            transaction.copy(
-                                merchant = merchantName.trim().ifBlank { transaction.merchant },
-                                amount = parsedAmount,
-                                category = if (transaction.type.trim().equals("DEBIT", ignoreCase = true)) {
-                                    selectedCategory
-                                } else {
-                                    ""
-                                },
-                                sourceBank = bankName.trim().ifBlank { transaction.sourceBank }
-                            )
-                        )
-                    }
+                TextButton(
+                    onClick = { showDeleteConfirmation = true },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
                 ) {
-                    Text("Save")
+                    Text("Delete")
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text("Cancel")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = {
+                            val parsedAmount = amount.toDoubleOrNull()
+                            if (parsedAmount == null || parsedAmount <= 0.0) {
+                                amountError = "Enter a valid amount"
+                                return@Button
+                            }
+
+                            onSave(
+                                transaction.copy(
+                                    merchant = merchantName.trim().ifBlank { transaction.merchant },
+                                    amount = parsedAmount,
+                                    category = if (transaction.type.trim().equals("DEBIT", ignoreCase = true)) {
+                                        selectedCategory
+                                    } else {
+                                        ""
+                                    },
+                                    sourceBank = bankName.trim().ifBlank { transaction.sourceBank }
+                                )
+                            )
+                        }
+                    ) {
+                        Text("Save")
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
         }
+    }
+
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            title = { Text("Delete transaction?") },
+            text = { Text("This will permanently remove this transaction from your records.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirmation = false
+                        onDelete()
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
