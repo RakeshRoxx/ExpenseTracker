@@ -12,8 +12,8 @@ val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties().takeIf { keystorePropertiesFile.exists() }?.apply {
     load(FileInputStream(keystorePropertiesFile))
 }
-val appVersionCode = 3
-val appVersionName = "1.5.0"
+val appVersionCode = 4
+val appVersionName = "1.6.0"
 
 android {
     namespace = "com.amaterasu.expense_tracker"
